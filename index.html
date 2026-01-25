@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FCM Push Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+body {
+  font-family: system-ui, -apple-system;
+  background: #0b0b0b;
+  color: #ffffff;
+  padding: 24px;
+}
+
+.container {
+  max-width: 520px;
+  margin: auto;
+}
+
+h2 {
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #262626;
+  border-radius: 8px;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+pre {
+  margin-top: 16px;
+  background: #111;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  overflow-x: auto;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>FCM Push Notification</h2>
+
+  <input id="token" placeholder="FCM Device Token" />
+  <input id="title" placeholder="Notification Title" />
+  <textarea id="body" placeholder="Notification Body"></textarea>
+  <input id="imageUrl" placeholder="Image URL (optional)" />
+  <input id="clickAction" placeholder="Click Action (optional)" />
+
+  <button onclick="sendNotification()">Send Notification</button>
+
+  <pre id="result"></pre>
+</div>
+
+<script>
+/* ✅ YOUR CONFIRMED BASE URL */
+const API_URL = "https://smtp-theta.vercel.app/api/fcm";
+
+async function sendNotification() {
+  const token = document.getElementById("token").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const body = document.getElementById("body").value.trim();
+  const imageUrl = document.getElementById("imageUrl").value.trim();
+  const clickAction = document.getElementById("clickAction").value.trim();
+  const result = document.getElementById("result");
+
+  if (!token || !title || !body) {
+    alert("Token, title, and body are required");
+    return;
+  }
+
+  const payload = {
+    token,
+    title,
+    body,
+    ...(imageUrl ? { imageUrl } : {}),
+    ...(clickAction ? { clickAction } : {}),
+  };
+
+  result.textContent = "Sending...";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    try {
+      result.textContent = JSON.stringify(JSON.parse(text), null, 2);
+    } catch {
+      result.textContent = text;
+    }
+
+  } catch (err) {
+    result.textContent = "Network error: " + err.message;
+  }
+}
+</script>
+</body>
+</html>
