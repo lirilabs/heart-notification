@@ -1,147 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Heart Notification</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>Send Email by UID</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<style>
+body {
+  background: #0b0b0b;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  padding: 24px;
+}
 
-  <style>
-    body {
-      background: #020617;
-      color: #e5e7eb;
-      font-family: system-ui;
-      height: 100vh;
-      display: grid;
-      place-items: center;
-      margin: 0;
-    }
+.container {
+  max-width: 480px;
+  margin: auto;
+}
 
-    .card {
-      width: 420px;
-      padding: 24px;
-      border-radius: 14px;
-      border: 1px solid #1e293b;
-      background: #020617;
-      box-shadow: 0 20px 40px rgba(0,0,0,.6);
-    }
+h2 {
+  font-weight: 600;
+  margin-bottom: 16px;
+}
 
-    h2 { text-align: center; margin-bottom: 12px; }
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  background: #111;
+  color: #fff;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  font-size: 14px;
+}
 
-    input, textarea, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-    }
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
 
-    input, textarea {
-      background: #020617;
-      color: #fff;
-      border: 1px solid #1e293b;
-    }
+button {
+  margin-top: 14px;
+  padding: 12px;
+  width: 100%;
+  background: #2563eb;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
 
-    button {
-      background: #ef4444;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-    .info {
-      font-size: 12px;
-      opacity: .85;
-      margin-bottom: 10px;
-    }
-
-    .status {
-      text-align: center;
-      font-size: 13px;
-    }
-  </style>
+pre {
+  margin-top: 16px;
+  background: #111;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+</style>
 </head>
+
 <body>
+<div class="container">
+  <h2>Send Email (by Firebase UID)</h2>
 
-<div class="card">
-  <h2>❤️ Heart Notification</h2>
+  <input id="uid" placeholder="Firebase UID" />
+  <input id="title" placeholder="Email Title" />
+  <textarea id="content" placeholder="Email Content"></textarea>
 
-  <div class="info" id="userInfo">Checking session…</div>
+  <button id="sendBtn" onclick="sendMail()">Send Email</button>
 
-  <input id="subject" placeholder="Mail Title" />
-  <textarea id="content" placeholder="Mail Content"></textarea>
-
-  <button onclick="sendMail()">Send Email</button>
-  <div class="status" id="status"></div>
+  <pre id="result"></pre>
 </div>
 
 <script>
-  /* ================= CONFIG ================= */
-  const API_URL = "https://heart-notification.vercel.app/api/send-mail";
+const API = "/api/mail";
 
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID"
-  };
+async function sendMail() {
+  const uid = document.getElementById("uid").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const content = document.getElementById("content").value.trim();
+  const result = document.getElementById("result");
+  const btn = document.getElementById("sendBtn");
 
-  firebase.initializeApp(firebaseConfig);
+  if (!uid || !title || !content) {
+    alert("UID, title, and content are required");
+    return;
+  }
 
-  let currentUser = null;
+  btn.disabled = true;
+  result.textContent = "Sending email...";
 
-  /* ========== AUTO SESSION DETECTION ========== */
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) {
-      document.getElementById("userInfo").textContent =
-        "❌ No active session found";
-      return;
-    }
+  const url =
+    `${API}?uid=${encodeURIComponent(uid)}` +
+    `&title=${encodeURIComponent(title)}` +
+    `&content=${encodeURIComponent(content)}`;
 
-    currentUser = user;
-
-    document.getElementById("userInfo").textContent =
-      `UID: ${user.uid} | Email: ${user.email || "N/A"}`;
-  });
-
-  /* ================= SEND MAIL ================= */
-  async function sendMail() {
-    const status = document.getElementById("status");
-    status.textContent = "Sending…";
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
 
     try {
-      if (!currentUser) throw new Error("User not authenticated");
-
-      const token = await currentUser.getIdToken();
-
-      const payload = {
-        to: currentUser.email,   // 👈 email fetched automatically
-        subject: subject.value,
-        text: content.value,
-        html: `<p>${content.value}</p>`
-      };
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      status.textContent = "✅ Email sent successfully";
-    } catch (e) {
-      status.textContent = "❌ " + e.message;
+      result.textContent = JSON.stringify(JSON.parse(text), null, 2);
+    } catch {
+      result.textContent = text;
     }
-  }
-</script>
 
+  } catch (err) {
+    result.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
 </body>
 </html>
