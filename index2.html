@@ -76,24 +76,24 @@ async function sendMail() {
   result.textContent = "Sending...";
 
   try {
-    const res = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid, title, content }),
+    const params = new URLSearchParams({
+      uid,
+      title,
+      content
     });
 
-    const text = await res.text();
+    const res = await fetch(`${API}?${params.toString()}`, {
+      method: "GET"
+    });
 
-    try {
-      result.textContent = JSON.stringify(JSON.parse(text), null, 2);
-    } catch {
-      result.textContent = text;
-    }
+    const data = await res.json();
+    result.textContent = JSON.stringify(data, null, 2);
 
   } catch (err) {
     result.textContent = err.message;
   }
 }
 </script>
+
 </body>
 </html>
