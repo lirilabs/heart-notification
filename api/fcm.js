@@ -1,35 +1,29 @@
 import admin from "firebase-admin";
 
 /* ======================================================
-   FORCE NODE RUNTIME (REQUIRED)
+   FORCE NODE RUNTIME
 ====================================================== */
 export const config = {
   runtime: "nodejs",
 };
 
 /* ======================================================
-   FIREBASE ADMIN INIT (SAFE SINGLETON)
+   FIREBASE ADMIN INIT (ENV JSON BASED)
 ====================================================== */
 if (!admin.apps.length) {
-  const {
-    FIREBASE_PROJECT_ID,
-    FIREBASE_CLIENT_EMAIL,
-    FIREBASE_PRIVATE_KEY,
-  } = process.env;
-
-  if (
-    !FIREBASE_PROJECT_ID ||
-    !FIREBASE_CLIENT_EMAIL ||
-    !FIREBASE_PRIVATE_KEY
-  ) {
-    throw new Error("Missing Firebase Admin environment variables");
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
   }
+
+  const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+  );
 
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: FIREBASE_PROJECT_ID,
-      clientEmail: FIREBASE_CLIENT_EMAIL,
-      privateKey: FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      projectId: serviceAccount.project_id,
+      clientEmail: serviceAccount.client_email,
+      privateKey: serviceAccount.private_key.replace(/\\n/g, "\n"),
     }),
   });
 }
