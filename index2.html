@@ -9,18 +9,13 @@
 body {
   background: #0b0b0b;
   color: #ffffff;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  font-family: system-ui, -apple-system;
   padding: 24px;
 }
 
 .container {
   max-width: 480px;
   margin: auto;
-}
-
-h2 {
-  font-weight: 600;
-  margin-bottom: 16px;
 }
 
 input, textarea {
@@ -31,7 +26,6 @@ input, textarea {
   color: #fff;
   border: 1px solid #262626;
   border-radius: 8px;
-  font-size: 14px;
 }
 
 textarea {
@@ -51,11 +45,6 @@ button {
   cursor: pointer;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 pre {
   margin-top: 16px;
   background: #111;
@@ -63,7 +52,6 @@ pre {
   border-radius: 8px;
   font-size: 13px;
   white-space: pre-wrap;
-  word-break: break-word;
 }
 </style>
 </head>
@@ -76,7 +64,7 @@ pre {
   <input id="title" placeholder="Email Title" />
   <textarea id="content" placeholder="Email Content"></textarea>
 
-  <button id="sendBtn" onclick="sendMail()">Send Email</button>
+  <button onclick="sendMail()">Send Email</button>
 
   <pre id="result"></pre>
 </div>
@@ -89,23 +77,23 @@ async function sendMail() {
   const title = document.getElementById("title").value.trim();
   const content = document.getElementById("content").value.trim();
   const result = document.getElementById("result");
-  const btn = document.getElementById("sendBtn");
 
   if (!uid || !title || !content) {
     alert("UID, title, and content are required");
     return;
   }
 
-  btn.disabled = true;
   result.textContent = "Sending email...";
 
-  const url =
-    `${API}?uid=${encodeURIComponent(uid)}` +
-    `&title=${encodeURIComponent(title)}` +
-    `&content=${encodeURIComponent(content)}`;
-
   try {
-    const res = await fetch(url);
+    const res = await fetch(API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ uid, title, content })
+    });
+
     const text = await res.text();
 
     try {
@@ -116,8 +104,6 @@ async function sendMail() {
 
   } catch (err) {
     result.textContent = err.message;
-  } finally {
-    btn.disabled = false;
   }
 }
 </script>
