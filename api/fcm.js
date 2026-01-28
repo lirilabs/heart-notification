@@ -1,30 +1,57 @@
 import admin from "firebase-admin";
 
 /* ======================================================
-   Firebase Admin Init
+   FORCE NODE RUNTIME (REQUIRED)
+====================================================== */
+export const config = {
+  runtime: "nodejs",
+};
+
+/* ======================================================
+   FIREBASE ADMIN INIT (SAFE SINGLETON)
 ====================================================== */
 if (!admin.apps.length) {
+  const {
+    FIREBASE_PROJECT_ID,
+    FIREBASE_CLIENT_EMAIL,
+    FIREBASE_PRIVATE_KEY,
+  } = process.env;
+
+  if (
+    !FIREBASE_PROJECT_ID ||
+    !FIREBASE_CLIENT_EMAIL ||
+    !FIREBASE_PRIVATE_KEY
+  ) {
+    throw new Error("Missing Firebase Admin environment variables");
+  }
+
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      projectId: FIREBASE_PROJECT_ID,
+      clientEmail: FIREBASE_CLIENT_EMAIL,
+      privateKey: FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
     }),
   });
 }
 
 /* ======================================================
-   FCM API
+   API HANDLER
 ====================================================== */
 export default async function handler(req, res) {
-  // CORS
+  /* ---------- CORS ---------- */
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
 
-  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   try {
@@ -39,7 +66,8 @@ export default async function handler(req, res) {
 
     if (!token || !title || !body) {
       return res.status(400).json({
-        error: "token, title and body are required",
+        success: false,
+        error: "token, title, and body are required",
       });
     }
 
@@ -62,8 +90,8 @@ export default async function handler(req, res) {
       android: {
         priority: "high",
         notification: {
-          sound: "default",
           channelId: "default",
+          sound: "default",
           ...(imageUrl ? { imageUrl } : {}),
         },
       },
@@ -72,7 +100,7 @@ export default async function handler(req, res) {
         payload: {
           aps: {
             sound: "default",
-            mutableContent: true,
+            "mutable-content": 1,
           },
         },
         fcmOptions: {
@@ -87,6 +115,7 @@ export default async function handler(req, res) {
       success: true,
       messageId,
     });
+
   } catch (err) {
     console.error("FCM ERROR:", err);
     return res.status(500).json({
