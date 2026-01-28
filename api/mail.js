@@ -2,99 +2,100 @@ import admin from "firebase-admin";
 import nodemailer from "nodemailer";
 
 /* ======================================================
-   Firebase Admin Initialization
-   ====================================================== */
+   Firebase Admin Initialization (SAFE)
+====================================================== */
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    }),
-  });
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      }),
+    });
+  } catch (e) {
+    console.error("Firebase init error:", e);
+  }
 }
 
 /* ======================================================
-   SMTP Transport
-   ====================================================== */
+   SMTP Transport (SAFE)
+====================================================== */
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
     user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
+    pass: process.env.SMTP_PASSWORD, // MUST have NO spaces
   },
 });
 
 /* ======================================================
-   Serverless Handler
-   ====================================================== */
+   API Handler (SERVERLESS SAFE)
+====================================================== */
 export default async function handler(req, res) {
-
-  /* -------------------- CORS (ALLOW ALL) -------------------- */
+  /* -------- CORS -------- */
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Max-Age", "86400");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
 
-  // Handle preflight request
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    return res.status(204).end();
   }
 
-  // Allow only POST
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Only POST method is allowed",
-    });
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Only GET allowed" });
   }
 
   try {
-    /* -------------------- AUTH -------------------- */
-    const authHeader = req.headers.authorization;
+    /* -------- SAFE URL PARSING -------- */
+    const baseUrl = `https://${process.env.VERCEL_URL || "localhost"}`;
+    const parsedUrl = new URL(req.url, baseUrl);
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        error: "Missing or invalid Authorization header",
-      });
-    }
+    const uid = parsedUrl.searchParams.get("uid");
+    const title = parsedUrl.searchParams.get("title");
+    const content = parsedUrl.searchParams.get("content");
 
-    const idToken = authHeader.split("Bearer ")[1];
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-
-    /* -------------------- INPUT -------------------- */
-    const { to, subject, text, html } = req.body || {};
-
-    if (!to || !subject || (!text && !html)) {
+    if (!uid || !title || !content) {
       return res.status(400).json({
-        error: "Required fields: to, subject, text or html",
+        error: "uid, title and content are required",
       });
     }
 
-    /* -------------------- SEND EMAIL -------------------- */
+    /* -------- Firebase User -------- */
+    const user = await admin.auth().getUser(uid);
+
+    if (!user?.email) {
+      return res.status(400).json({
+        error: "User does not have an email",
+      });
+    }
+
+    /* -------- Send Email -------- */
     await transporter.sendMail({
-      from: `"Hive SMTP" <${process.env.SMTP_EMAIL}>`,
-      to,
-      subject,
-      text,
-      html,
+      from: `"Credible" <${process.env.SMTP_EMAIL}>`,
+      to: user.email,
+      subject: title,
+      text: content,
+      html: `<p>${content.replace(/\n/g, "<br/>")}</p>`,
     });
 
-    /* -------------------- SUCCESS -------------------- */
     return res.status(200).json({
       success: true,
-      uid: decodedToken.uid,
+      uid,
+      email: user.email,
       message: "Email sent successfully",
     });
 
-  } catch (error) {
-    console.error("SMTP API Error:", error);
-
+  } catch (err) {
+    console.error("MAIL FUNCTION CRASH:", err);
     return res.status(500).json({
       success: false,
-      error: "Internal server error",
-      details: error.message,
+      error: err.message,
     });
   }
 }
