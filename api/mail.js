@@ -77,7 +77,7 @@ export default async function handler(req, res) {
 
     /* -------- Send Email -------- */
     await transporter.sendMail({
-      from: `"Credible" <${process.env.SMTP_EMAIL}>`,
+      from: `"Heart❣️" <${process.env.SMTP_EMAIL}>`,
       to: user.email,
       subject: title,
       text: content,
