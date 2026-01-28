@@ -2,22 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Send Email by UID</title>
+<title>Mail API Test</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <style>
 body {
   background: #0b0b0b;
-  color: #ffffff;
-  font-family: system-ui, -apple-system;
+  color: #fff;
+  font-family: system-ui;
   padding: 24px;
 }
-
 .container {
   max-width: 480px;
   margin: auto;
 }
-
 input, textarea {
   width: 100%;
   padding: 12px;
@@ -27,38 +25,30 @@ input, textarea {
   border: 1px solid #262626;
   border-radius: 8px;
 }
-
-textarea {
-  min-height: 90px;
-  resize: vertical;
-}
-
 button {
-  margin-top: 14px;
+  margin-top: 12px;
   padding: 12px;
   width: 100%;
-  background: #2563eb;
+  background: #16a34a;
   border: none;
   border-radius: 10px;
   color: #fff;
   font-size: 15px;
   cursor: pointer;
 }
-
 pre {
   margin-top: 16px;
   background: #111;
   padding: 12px;
   border-radius: 8px;
   font-size: 13px;
-  white-space: pre-wrap;
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <h2>Send Email (by Firebase UID)</h2>
+  <h2>Send Email by UID</h2>
 
   <input id="uid" placeholder="Firebase UID" />
   <input id="title" placeholder="Email Title" />
@@ -79,19 +69,17 @@ async function sendMail() {
   const result = document.getElementById("result");
 
   if (!uid || !title || !content) {
-    alert("UID, title, and content are required");
+    alert("All fields are required");
     return;
   }
 
-  result.textContent = "Sending email...";
+  result.textContent = "Sending...";
 
   try {
     const res = await fetch(API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ uid, title, content })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid, title, content }),
     });
 
     const text = await res.text();
