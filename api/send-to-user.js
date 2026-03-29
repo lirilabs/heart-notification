@@ -6,8 +6,7 @@ import admin from "firebase-admin";
 export const config = { runtime: "nodejs" };
 
 /* ======================================================
-   FIREBASE ADMIN INIT — module-level, single init
-   Matches the exact same pattern as the working example
+   FIREBASE ADMIN INIT
 ====================================================== */
 if (!admin.apps.length) {
   const { FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY } =
@@ -37,19 +36,20 @@ const db        = admin.firestore();
 const messaging = admin.messaging();
 
 /* ======================================================
-   HELPERS  (all Firestore — NOT Realtime Database)
+   HELPERS
 ====================================================== */
 
 /**
- * users/{uid}  →  fcmToken(s)
- * users/{uid}/personalizedCategory  →  topic
+ * users/{uid} → fcmToken + personalizedCategory (both are fields on the doc)
  */
 async function getUserPayload(uid) {
   const userSnap = await db.doc(`users/${uid}`).get();
   if (!userSnap.exists) return { error: "user_not_found" };
 
-  const userData = userSnap.data();
-  const rawToken = userData?.fcmToken;
+  const data = userSnap.data();
+
+  // fcmToken — string or array
+  const rawToken = data?.fcmToken;
   if (!rawToken) return { error: "no_fcm_token" };
 
   const tokens = Array.isArray(rawToken)
@@ -57,22 +57,16 @@ async function getUserPayload(uid) {
     : [rawToken].filter(Boolean);
   if (!tokens.length) return { error: "empty_fcm_token" };
 
-  const catSnap = await db
-    .collection(`users/${uid}/personalizedCategory`)
-    .limit(1)
-    .get();
-
-  if (catSnap.empty) return { error: "no_personalized_category" };
-
-  const topic = catSnap.docs[0].data()?.topic;
-  if (!topic) return { error: "topic_field_missing" };
+  // personalizedCategory — direct string field on the user doc
+  const topic = data?.personalizedCategory;
+  if (!topic) return { error: "no_personalized_category" };
 
   return { tokens, topic };
 }
 
 /**
- * prompts/{topic}  →  { title, body, imageUrl }
- * Supports both  { messages: string[] }  and  { body: string }  shapes.
+ * prompts/{topic} → { title, body, imageUrl }
+ * Supports both { messages: string[] } and { body: string } shapes.
  */
 async function getPrompt(topic) {
   const snap = await db.doc(`prompts/${topic}`).get();
@@ -121,8 +115,7 @@ async function sendFcm(tokens, { title, body, imageUrl }) {
   }
 
   const result = await messaging.sendEachForMulticast({ ...baseMessage, tokens });
-  const success = [];
-  const failed  = [];
+  const success = [], failed = [];
   result.responses.forEach((r, i) => {
     if (r.success) success.push({ token: tokens[i], messageId: r.messageId });
     else           failed.push({ token: tokens[i], error: r.error?.message });
@@ -134,7 +127,6 @@ async function sendFcm(tokens, { title, body, imageUrl }) {
    API HANDLER
 ====================================================== */
 export default async function handler(req, res) {
-  /* ── CORS ── */
   res.setHeader("Access-Control-Allow-Origin",  "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -148,13 +140,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, error: "uid is required" });
 
   try {
-    /* 1 + 2 — token + topic */
+    /* 1 + 2 — token + topic (both from same user doc) */
     const payload = await getUserPayload(uid);
     if (payload.error)
       return res.status(422).json({
         success: false,
         result: { uid, status: "skipped", reason: payload.error },
       });
+
+    console.log(`📨 uid=${uid} topic=${payload.topic} tokens=${payload.tokens.length}`);
 
     /* 3 — prompt */
     const prompt = await getPrompt(payload.topic);
