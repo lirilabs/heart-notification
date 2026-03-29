@@ -48,7 +48,6 @@ async function getUserPayload(uid) {
 
   const data = userSnap.data();
 
-  // fcmToken — string or array
   const rawToken = data?.fcmToken;
   if (!rawToken) return { error: "no_fcm_token" };
 
@@ -57,7 +56,6 @@ async function getUserPayload(uid) {
     : [rawToken].filter(Boolean);
   if (!tokens.length) return { error: "empty_fcm_token" };
 
-  // personalizedCategory — direct string field on the user doc
   const topic = data?.personalizedCategory;
   if (!topic) return { error: "no_personalized_category" };
 
@@ -65,11 +63,14 @@ async function getUserPayload(uid) {
 }
 
 /**
- * prompts — query by category, pick a random doc
- * Builds a Pinterest-style notification:
- *   title   = prompt's own title (no category label)
- *   body    = first ~120 chars of promptText as a teaser
- *   image   = first entry in the images[] array (base64 → data URI)
+ * prompts — query by category, pick a random doc.
+ *
+ * FIX: imageBase64 is NO LONGER included in the FCM data payload.
+ * FCM has a 4 KB hard limit on the data object. Base64 images are
+ * typically 50–300 KB, which causes "Android message is too big".
+ *
+ * Instead, we send promptId so the app can fetch the full prompt
+ * (including images) from Firestore after the user taps the notification.
  */
 async function getPrompt(topic) {
   const snap = await db
@@ -80,39 +81,36 @@ async function getPrompt(topic) {
   if (snap.empty) return { error: `no_prompt_for_topic:${topic}` };
 
   const docs = snap.docs;
-  const doc  = docs[Math.floor(Math.random() * docs.length)].data();
+  const docSnap = docs[Math.floor(Math.random() * docs.length)];
+  const doc  = docSnap.data();
 
-  // ── Title: use the prompt's own title, clean and simple ──
+  // Title
   const title = doc?.title ?? topic;
 
-  // ── Body: first 120 chars of promptText as a teaser ──
+  // Body preview — first ~120 chars of promptText
   const rawText = doc?.promptText ?? doc?.body ?? null;
   if (!rawText) return { error: "prompt_body_empty" };
 
-  // Take first 120 chars, break at last space so no word is cut
   const preview = rawText.slice(0, 120);
   const body = rawText.length > 120
-    ? (preview.lastIndexOf(" ") > 60 ? preview.slice(0, preview.lastIndexOf(" ")) : preview) + "…"
+    ? (preview.lastIndexOf(" ") > 60
+        ? preview.slice(0, preview.lastIndexOf(" "))
+        : preview) + "…"
     : rawText;
 
-  // ── Image: first item in images[] array (base64 WebP/PNG stored in Firestore) ──
-  // FCM image must be a public URL — base64 can't be sent directly.
-  // We pass the base64 as a data field so the app can render it on the notification.
-  const images = doc?.images ?? [];
-  const base64Image = images.length > 0 ? images[0] : null;
-
-  // ── Extra data payload (available when user taps the notification) ──
+  // ✅ FIX: imageBase64 removed — never send base64 in FCM data payload.
+  // The app should load images from Firestore using promptId after tap.
   const extra = {
-    promptId:    doc?.id          ?? "",
-    promptText:  rawText,
+    promptId:    docSnap.id       ?? doc?.id ?? "",
     category:    doc?.category    ?? topic,
     authorName:  doc?.authorName  ?? "",
     authorPhoto: doc?.authorPhoto ?? "",
-    ...(base64Image ? { imageBase64: base64Image } : {}),
+    // promptText kept for quick preview on notification tap (short is fine)
+    // but truncate to keep payload safely under 4 KB
+    promptText:  rawText.slice(0, 300),
   };
 
-  // imageUrl must be a public https URL for FCM — skip base64 for notification image
-  // but pass it in data so the app can show it as a rich notification locally
+  // imageUrl must be a public https:// URL (not base64) for FCM notification image
   return { title, body, imageUrl: doc?.imageUrl ?? null, extra };
 }
 
@@ -126,7 +124,6 @@ async function sendFcm(tokens, { title, body, imageUrl, extra = {} }) {
     },
     data: {
       sent_at: Date.now().toString(),
-      // All extra fields stringified so the app can use them on tap
       ...Object.fromEntries(
         Object.entries(extra).map(([k, v]) => [k, String(v)])
       ),
@@ -176,7 +173,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ success: false, error: "uid is required" });
 
   try {
-    /* 1 + 2 — token + topic (both from same user doc) */
+    /* 1 + 2 — token + topic */
     const payload = await getUserPayload(uid);
     if (payload.error)
       return res.status(422).json({
@@ -202,7 +199,7 @@ export default async function handler(req, res) {
         ? fcmResult.failed.length > 0 ? "partial" : "ok"
         : "failed";
 
-    /* 5 — audit log (non-critical) */
+    /* 5 — audit log */
     await db
       .collection(`users/${uid}/notificationLog`)
       .add({
