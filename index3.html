@@ -125,22 +125,17 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.5);pointer-events:none}
 .toggle input:checked ~ .toggle-thumb{transform:translateX(18px)}
 
-/* ── TIME DROPDOWNS ── */
+/* ── TIME INPUT ── */
 .time-label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
 
-.time-dropdowns{display:flex;align-items:center;gap:6px;margin-bottom:10px}
-
-.time-sep{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text2);line-height:1;padding-bottom:2px;user-select:none}
-
-.sel-wrap{position:relative;flex:1}
-.sel-wrap::after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text2);pointer-events:none}
+.time-dropdowns{display:flex;align-items:center;margin-bottom:10px}
 
 .time-sel{
   width:100%;
   background:var(--surf);
   border:1px solid var(--border2);
   border-radius:9px;
-  padding:10px 28px 10px 0;
+  padding:10px 14px;
   color:var(--text);
   font-family:var(--mono);
   font-size:22px;
@@ -148,12 +143,21 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   text-align:center;
   outline:none;
   cursor:pointer;
-  appearance:none;
-  -webkit-appearance:none;
   transition:border-color .2s,box-shadow .2s,color .2s;
+  /* Make the clock icon look good */
+  color-scheme: dark;
 }
+.time-sel::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.time-sel::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 .time-sel:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
-.time-sel option{background:#10111f;font-size:15px;font-weight:400}
 
 /* coloured when slot is enabled */
 .slot-card.enabled    .time-sel{color:var(--accent); border-color:rgba(79,142,247,.35)}
@@ -320,7 +324,7 @@ pre.rbody{padding:16px;font-family:var(--mono);font-size:11px;line-height:1.9;co
         </select>
       </div>
 
-      <div class="flabel" style="margin-bottom:10px">Schedule Slots — use the dropdowns to set hour &amp; minute</div>
+      <div class="flabel" style="margin-bottom:10px">Schedule Slots — use the time input to set hour &amp; minute</div>
       <div class="slots-grid" id="slotsGrid"></div>
 
       <div class="flabel" style="margin-bottom:8px">Next Fire Times (UTC)</div>
@@ -389,25 +393,6 @@ window.addEventListener('DOMContentLoaded',()=>{
 function base()  {return $('baseUrl').value.trim().replace(/\/$/,'')||DEFAULT_BASE;}
 function secret(){return $('cron_secret').value.trim();}
 function tz()   {return $('global_tz').value;}
-
-/* ── DROPDOWN BUILDERS ── */
-function buildHourOptions(sel){
-  return Array.from({length:24},(_,h)=>{
-    const v=String(h).padStart(2,'0');
-    return `<option value="${h}"${h===sel?' selected':''}>${v}</option>`;
-  }).join('');
-}
-// minutes in 5-min steps
-function buildMinuteOptions(sel){
-  // snap sel to nearest 5
-  const snapped=Math.round(sel/5)*5%60;
-  return Array.from({length:12},(_,i)=>{
-    const m=i*5;
-    const v=String(m).padStart(2,'0');
-    const isSel=m===snapped;
-    return `<option value="${m}"${isSel?' selected':''}>${v}</option>`;
-  }).join('');
-}
 
 /* ── STATS ── */
 function bump(ok){sT++;if(ok)sO++;else sF++;$('sT').textContent=sT;$('sO').textContent=sO;$('sF').textContent=sF;}
@@ -497,17 +482,7 @@ function renderSlots(slots){
 
       <div class="time-label">${tzShort()} time</div>
       <div class="time-dropdowns">
-        <div class="sel-wrap">
-          <select class="time-sel" id="hr_${slot.id}">
-            ${buildHourOptions(localHour)}
-          </select>
-        </div>
-        <span class="time-sep">:</span>
-        <div class="sel-wrap">
-          <select class="time-sel" id="mn_${slot.id}">
-            ${buildMinuteOptions(localMinute)}
-          </select>
-        </div>
+        <input type="time" class="time-sel" id="tm_${slot.id}" value="${pad(localHour)}:${pad(localMinute)}" required />
       </div>
       <div class="slot-utc" id="utc_${slot.id}">→ UTC &nbsp; ${fmtUtc(slot.utcHour,slot.utcMinute)}</div>
     `;
@@ -518,9 +493,7 @@ function renderSlots(slots){
     card.querySelector(`#tog_${slot.id}`).addEventListener('change',function(){
       onToggle(slot.id,this.checked,card);
     });
-    const updateTime=()=>onDropdownChange(slot.id,card);
-    card.querySelector(`#hr_${slot.id}`).addEventListener('change',updateTime);
-    card.querySelector(`#mn_${slot.id}`).addEventListener('change',updateTime);
+    card.querySelector(`#tm_${slot.id}`).addEventListener('change',()=>onTimeChange(slot.id,card));
   });
 
   renderNextFires(slots);
@@ -536,14 +509,19 @@ function onToggle(slotId,checked,card){
   setSaveStatus('unsaved','Unsaved changes — click Save to push to server');
 }
 
-function onDropdownChange(slotId,card){
-  const lh=parseInt($('hr_'+slotId).value,10);
-  const lm=parseInt($('mn_'+slotId).value,10);
-  const{utcHour,utcMinute}=localToUtc(lh,lm,tz());
-  const s=serverSlots.find(x=>x.id===slotId);
-  if(s){s.utcHour=utcHour;s.utcMinute=utcMinute;}
-  const lbl=$('utc_'+slotId);
-  if(lbl)lbl.textContent=`→ UTC   ${fmtUtc(utcHour,utcMinute)}`;
+function onTimeChange(slotId,card){
+  const tVal = $('tm_'+slotId).value; // returns "HH:MM" natively
+  if(!tVal) return;
+  
+  const [lh, lm] = tVal.split(':').map(Number);
+  const {utcHour, utcMinute} = localToUtc(lh,lm,tz());
+  
+  const s = serverSlots.find(x=>x.id===slotId);
+  if(s){s.utcHour=utcHour; s.utcMinute=utcMinute;}
+  
+  const lbl = $('utc_'+slotId);
+  if(lbl) lbl.textContent = `→ UTC   ${fmtUtc(utcHour,utcMinute)}`;
+  
   renderNextFires(serverSlots);
   setSaveStatus('unsaved','Unsaved changes — click Save to push to server');
 }
