@@ -28,33 +28,58 @@ const messaging = admin.messaging();
 
 const CONCURRENCY   = Number(process.env.FCM_CONCURRENCY ?? 20);
 const SCHEDULE_DOC  = "config/schedules";
-const WINDOW_MINS   = 28; // match window around scheduled time (just under 30min cron gap)
+
+/* 
+  WINDOW_MINS: The max duration AFTER a scheduled time that a cron will pick it up.
+  Set to 35 min to ensure a cron running every 30 minutes never misses a slot, 
+  while strictly preventing early triggers.
+*/
+const WINDOW_MINS   = 35; 
 
 /* ======================================================
-   SCHEDULE CHECK
-   Reads slots from Firestore. Returns the matching slot
-   if current UTC time falls within WINDOW_MINS of it.
+   SCHEDULE CHECK (IMPROVED & FIXED)
+   Strictly fires ONLY if time has arrived. Uses Firestore
+   state to guarantee exactly 1 execution per day avoiding spam.
 ====================================================== */
 async function getMatchingSlot() {
   const snap = await db.doc(SCHEDULE_DOC).get();
+  if (!snap.exists) return { slot: null };
 
-  // Default: one slot at 06:30 UTC (12:00 IST)
-  const { slots = [{ id: "slot_1", utcHour: 6, utcMinute: 30, enabled: true }] } =
-    snap.exists ? snap.data() : {};
+  const data = snap.data();
+  const slots = data.slots || [];
 
-  const now     = new Date();
-  const nowMins = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const now       = new Date();
+  const todayStr  = now.toISOString().split("T")[0]; // UTC Date
+  const nowMins   = now.getUTCHours() * 60 + now.getUTCMinutes();
 
-  for (const slot of slots) {
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
     if (!slot.enabled) continue;
+
     const slotMins = (slot.utcHour ?? 0) * 60 + (slot.utcMinute ?? 0);
-    const diff     = Math.abs(nowMins - slotMins);
-    // Also handle midnight wrap (e.g. slot at 00:00, cron fires at 23:45)
-    const diffWrapped = Math.min(diff, 1440 - diff);
-    if (diffWrapped <= WINDOW_MINS) return slot;
+    
+    // Calculate minutes passed SINCE scheduled time
+    let minsPassed = nowMins - slotMins;
+    if (minsPassed < -720) minsPassed += 1440; // wrap over midnight
+
+    // Only fire if the scheduled time HAS COMPLETELY ARRIVED, and isn't too old
+    if (minsPassed >= 0 && minsPassed <= WINDOW_MINS) {
+      
+      // ✅ Critical fix: ensure we haven't already fired this slot today
+      if (slot.lastFiredDate === todayStr) {
+        console.log(`⏱️ Slot ${slot.id} already fired today (${todayStr}), skipping duplicate.`);
+        continue;
+      }
+
+      // Mark slot as fired today so subsequent crons don't duplicate it
+      slots[i].lastFiredDate = todayStr;
+      
+      // We return both so it updates the database immediately tracking the fire
+      return { slot, slotsArrayToSave: slots }; 
+    }
   }
 
-  return null; // no slot matches right now
+  return { slot: null };
 }
 
 /* ======================================================
@@ -93,39 +118,20 @@ async function getAllUsers(batchSize = 500) {
 
 /* ======================================================
    DUPLICATE DEVICE DEDUPLICATION
-
-   Problem: A user may uninstall + reinstall the app,
-   or use two devices. Firestore might have stale tokens.
-   More critically: two *different* user accounts can share
-   the same physical device (e.g. family sharing, QA tester).
-   Sending to the same FCM token twice → duplicate notification.
-
-   Solution:
-   1. Build a map of token → first-seen uid
-   2. For each user, keep only tokens NOT already claimed
-      by a previously processed user
-   3. Users whose ALL tokens are duplicates get skipped
-      (the device already gets one notification via its owner)
-   4. Also deduplicate tokens WITHIN a single user's array
 ====================================================== */
 function deduplicateUsers(users) {
   const tokenOwner = new Map(); // token → uid of first claimer
   const dedupedUsers = [];
 
   for (const user of users) {
-    // Deduplicate within the user's own token list first
     const uniqueOwn = [...new Set(user.tokens)];
-
-    // Keep only tokens not already claimed by another user
     const freshTokens = uniqueOwn.filter((t) => {
-      if (tokenOwner.has(t)) return false; // duplicate — skip
+      if (tokenOwner.has(t)) return false; 
       tokenOwner.set(t, user.uid);
       return true;
     });
 
     if (freshTokens.length === 0) {
-      // All tokens are duplicates — this device will already receive
-      // a notification via the user who first claimed those tokens
       dedupedUsers.push({ ...user, tokens: [], skip: true, skipReason: "duplicate_device" });
     } else {
       dedupedUsers.push({ ...user, tokens: freshTokens, skip: false });
@@ -160,7 +166,6 @@ async function getPrompt(topic) {
         : preview) + "…"
     : rawText;
 
-  // ✅ No imageBase64 — FCM 4 KB limit. App fetches image from Firestore on tap via promptId.
   const extra = {
     promptId:    docSnap.id          ?? "",
     category:    doc?.category       ?? topic,
@@ -227,7 +232,6 @@ async function processUser({ uid, tokens, topic }) {
         ? fcmResult.failed.length > 0 ? "partial" : "ok"
         : "failed";
 
-    // Audit log (non-critical)
     await db
       .collection(`users/${uid}/notificationLog`)
       .add({
@@ -249,7 +253,7 @@ async function processUser({ uid, tokens, topic }) {
 }
 
 /* ======================================================
-   API HANDLER — called by Vercel cron every 30 minutes
+   API HANDLER — called by Vercel cron
 ====================================================== */
 export default async function handler(req, res) {
   /* ── Security ── */
@@ -264,15 +268,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
 
   /* ── Check if any schedule slot matches right now ── */
-  // ?force=1 bypasses the time-window check (used by the console's "Run Now" button)
   const force = req.query?.force === "1" || req.body?.force === true;
 
   let matchedSlot;
+  let slotsToUpdate = null;
+
   if (force) {
     matchedSlot = { id: "manual", label: "Manual Trigger", utcHour: -1, utcMinute: -1 };
     console.log("⚡  Force flag set — bypassing schedule window check");
   } else {
-    matchedSlot = await getMatchingSlot();
+    // Rely on updated and strict logic
+    const resSlot = await getMatchingSlot();
+    matchedSlot = resSlot.slot;
+    slotsToUpdate = resSlot.slotsArrayToSave;
   }
 
   if (!matchedSlot) {
@@ -284,7 +292,12 @@ export default async function handler(req, res) {
     });
   }
 
-  console.log(`⏰  Slot matched: ${matchedSlot.label ?? matchedSlot.id} (${matchedSlot.utcHour}:${String(matchedSlot.utcMinute).padStart(2,"0")} UTC)`);
+  // ✅ Immediately log the "fired" state to the database to avert double triggers
+  if (slotsToUpdate) {
+    await db.doc(SCHEDULE_DOC).update({ slots: slotsToUpdate }).catch(console.error);
+  }
+
+  console.log(`⏰  Slot matched: ${matchedSlot.label ?? matchedSlot.id}`);
 
   const stats = {
     slot:      matchedSlot.id,
@@ -294,12 +307,10 @@ export default async function handler(req, res) {
   };
 
   try {
-    /* 1. Fetch all valid users */
     const rawUsers   = await getAllUsers();
     stats.total      = rawUsers.length;
     console.log(`👥  Raw users with tokens: ${rawUsers.length}`);
 
-    /* 2. Deduplicate devices */
     const dedupedUsers     = deduplicateUsers(rawUsers);
     const skippedDuplicates = dedupedUsers.filter(u => u.skip);
     stats.deduped = skippedDuplicates.length;
@@ -308,7 +319,6 @@ export default async function handler(req, res) {
     const toSend = dedupedUsers.filter(u => !u.skip);
     console.log(`📤  Sending to ${toSend.length} unique devices`);
 
-    /* 3. Process in concurrent batches */
     for (let i = 0; i < toSend.length; i += CONCURRENCY) {
       const batch   = toSend.slice(i, i + CONCURRENCY);
       const results = await Promise.allSettled(batch.map(processUser));
@@ -328,7 +338,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Skipped duplicates count into stats
     stats.skipped += skippedDuplicates.length;
     stats.finishedAt = new Date().toISOString();
     console.log("📊  Stats:", stats);
