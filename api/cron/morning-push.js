@@ -33,7 +33,7 @@ const messaging = admin.messaging();
 const CONCURRENCY = Number(process.env.FCM_CONCURRENCY ?? 20);
 
 /* ======================================================
-   HELPERS  (same logic, fully self-contained)
+   HELPERS
 ====================================================== */
 async function getAllUserIds(batchSize = 500) {
   const uids = [];
@@ -59,7 +59,6 @@ async function getUserPayload(uid) {
 
   const data = userSnap.data();
 
-  // fcmToken — string or array field on the user doc
   const rawToken = data?.fcmToken;
   if (!rawToken) return { error: "no_fcm_token" };
 
@@ -68,13 +67,17 @@ async function getUserPayload(uid) {
     : [rawToken].filter(Boolean);
   if (!tokens.length) return { error: "empty_fcm_token" };
 
-  // personalizedCategory — direct string field on the user doc (NOT a subcollection)
   const topic = data?.personalizedCategory;
   if (!topic) return { error: "no_personalized_category" };
 
   return { tokens, topic };
 }
 
+/**
+ * FIX: imageBase64 removed from FCM data payload.
+ * FCM 4 KB limit — base64 images blow past it instantly.
+ * App should fetch images from Firestore using promptId after tap.
+ */
 async function getPrompt(topic) {
   const snap = await db
     .collection("prompts")
@@ -84,7 +87,8 @@ async function getPrompt(topic) {
   if (snap.empty) return { error: `no_prompt_for_topic:${topic}` };
 
   const docs = snap.docs;
-  const doc  = docs[Math.floor(Math.random() * docs.length)].data();
+  const docSnap = docs[Math.floor(Math.random() * docs.length)];
+  const doc  = docSnap.data();
 
   const title   = doc?.title ?? topic;
   const rawText = doc?.promptText ?? doc?.body ?? null;
@@ -92,19 +96,18 @@ async function getPrompt(topic) {
 
   const preview = rawText.slice(0, 120);
   const body = rawText.length > 120
-    ? (preview.lastIndexOf(" ") > 60 ? preview.slice(0, preview.lastIndexOf(" ")) : preview) + "…"
+    ? (preview.lastIndexOf(" ") > 60
+        ? preview.slice(0, preview.lastIndexOf(" "))
+        : preview) + "…"
     : rawText;
 
-  const images = doc?.images ?? [];
-  const base64Image = images.length > 0 ? images[0] : null;
-
+  // ✅ FIX: No imageBase64 here — keeps payload under 4 KB
   const extra = {
-    promptId:    doc?.id          ?? "",
-    promptText:  rawText,
+    promptId:    docSnap.id       ?? doc?.id ?? "",
     category:    doc?.category    ?? topic,
     authorName:  doc?.authorName  ?? "",
     authorPhoto: doc?.authorPhoto ?? "",
-    ...(base64Image ? { imageBase64: base64Image } : {}),
+    promptText:  rawText.slice(0, 300),
   };
 
   return { title, body, imageUrl: doc?.imageUrl ?? null, extra };
@@ -121,7 +124,11 @@ async function sendFcm(tokens, { title, body, imageUrl, extra = {} }) {
     },
     android: {
       priority: "high",
-      notification: { channelId: "default", sound: "default", ...(imageUrl ? { imageUrl } : {}) },
+      notification: {
+        channelId: "default",
+        sound: "default",
+        ...(imageUrl ? { imageUrl } : {}),
+      },
     },
     apns: {
       payload: { aps: { sound: "default", "mutable-content": 1 } },
@@ -180,7 +187,10 @@ async function processUser(uid) {
    API HANDLER
 ====================================================== */
 export default async function handler(req, res) {
-  /* ── Security ── */
+  /* ── Security: CRON_SECRET check ──
+     Set CRON_SECRET in Vercel env vars (Settings → Environment Variables).
+     Generate with: openssl rand -base64 32
+     If not set, the check is skipped (open access — fine for dev). */
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
     const auth = req.headers["authorization"] ?? "";
