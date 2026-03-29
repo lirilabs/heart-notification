@@ -10,8 +10,6 @@ import { getFirestore, getMessaging } from "./firebase.js";
 
 /**
  * Returns all active user UIDs from the top-level users collection.
- * Fetches in batches of `batchSize` using startAfter cursors so the
- * Firestore read never times out on large collections.
  */
 export async function getAllUserIds(batchSize = 500) {
   const db = getFirestore();
@@ -19,7 +17,7 @@ export async function getAllUserIds(batchSize = 500) {
   let lastDoc = null;
 
   while (true) {
-    let q = db.collection("users").select().limit(batchSize); // select() = metadata only (faster)
+    let q = db.collection("users").select().limit(batchSize);
     if (lastDoc) q = q.startAfter(lastDoc);
 
     const snap = await q.get();
@@ -28,7 +26,7 @@ export async function getAllUserIds(batchSize = 500) {
     snap.docs.forEach((d) => uids.push(d.id));
     lastDoc = snap.docs[snap.docs.length - 1];
 
-    if (snap.docs.length < batchSize) break; // last page
+    if (snap.docs.length < batchSize) break;
   }
 
   return uids;
@@ -41,7 +39,6 @@ export async function getAllUserIds(batchSize = 500) {
 export async function getUserPayload(uid) {
   const db = getFirestore();
 
-  // 1. User doc → fcmToken
   const userSnap = await db.doc(`users/${uid}`).get();
   if (!userSnap.exists) return null;
 
@@ -49,13 +46,11 @@ export async function getUserPayload(uid) {
   const rawToken = userData?.fcmToken;
   if (!rawToken) return null;
 
-  // Support single token string OR array of tokens
   const tokens = Array.isArray(rawToken)
     ? rawToken.filter(Boolean)
     : [rawToken].filter(Boolean);
   if (!tokens.length) return null;
 
-  // 2. Personalized category subcollection → topic
   const catSnap = await db
     .collection(`users/${uid}/personalizedCategory`)
     .limit(1)
@@ -71,7 +66,6 @@ export async function getUserPayload(uid) {
 
 /**
  * Loads a random message from the prompts/{topic} document.
- * Supports both { messages: string[] } and { body: string } shapes.
  */
 export async function getPromptForTopic(topic) {
   const db = getFirestore();
@@ -83,7 +77,6 @@ export async function getPromptForTopic(topic) {
 
   let body = null;
   if (Array.isArray(data?.messages) && data.messages.length) {
-    // Pick a random message so users don't get the same text every day
     body = data.messages[Math.floor(Math.random() * data.messages.length)];
   } else if (typeof data?.body === "string") {
     body = data.body;
@@ -95,7 +88,6 @@ export async function getPromptForTopic(topic) {
 
 /**
  * Sends an FCM notification to one or more tokens.
- * Returns an object with successes and failures.
  */
 export async function sendFcmToTokens(tokens, { title, body, imageUrl, data = {} }) {
   const messaging = getMessaging();
@@ -128,7 +120,6 @@ export async function sendFcmToTokens(tokens, { title, body, imageUrl, data = {}
 
   const results = { success: [], failed: [] };
 
-  // Use sendEachForMulticast for multiple tokens, single send for one
   if (tokens.length === 1) {
     try {
       const id = await messaging.send({ ...baseMessage, token: tokens[0] });
@@ -137,10 +128,7 @@ export async function sendFcmToTokens(tokens, { title, body, imageUrl, data = {}
       results.failed.push({ token: tokens[0], error: err.message });
     }
   } else {
-    const res = await messaging.sendEachForMulticast({
-      ...baseMessage,
-      tokens,
-    });
+    const res = await messaging.sendEachForMulticast({ ...baseMessage, tokens });
     res.responses.forEach((r, i) => {
       if (r.success) {
         results.success.push({ token: tokens[i], messageId: r.messageId });
@@ -154,11 +142,7 @@ export async function sendFcmToTokens(tokens, { title, body, imageUrl, data = {}
 }
 
 /**
- * Processes a single user end-to-end:
- *  1. Fetch payload (tokens + topic)
- *  2. Fetch prompt
- *  3. Send FCM
- *  4. Log result to Firestore audit trail
+ * Processes a single user end-to-end.
  */
 export async function processUser(uid) {
   const db = getFirestore();
@@ -179,7 +163,6 @@ export async function processUser(uid) {
           : "ok"
         : "failed";
 
-    // Write audit log under users/{uid}/notificationLog
     await db
       .collection(`users/${uid}/notificationLog`)
       .add({
@@ -191,7 +174,7 @@ export async function processUser(uid) {
         successCount: fcmResult.success.length,
         failCount: fcmResult.failed.length,
       })
-      .catch(() => {}); // non-critical – never let logging kill a notification
+      .catch(() => {});
 
     return { uid, status, topic: payload.topic, ...fcmResult };
   } catch (err) {
