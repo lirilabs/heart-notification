@@ -83,21 +83,36 @@ async function getPrompt(topic) {
 
   if (snap.empty) return { error: `no_prompt_for_topic:${topic}` };
 
-  // Pick a random document from the results
   const docs = snap.docs;
   const doc  = docs[Math.floor(Math.random() * docs.length)].data();
 
-  const title = doc?.title      ?? topic;
-  const body  = doc?.promptText ?? doc?.body ?? null;
+  const title   = `🔥 Daily ${topic} Prompt`;
+  const rawText = doc?.promptText ?? doc?.body ?? null;
+  if (!rawText) return { error: "prompt_body_empty" };
 
-  if (!body) return { error: "prompt_body_empty" };
-  return { title, body, imageUrl: doc?.imageUrl ?? null };
+  const body = rawText.length > 200 ? rawText.slice(0, 197) + "…" : rawText;
+
+  const extra = {
+    promptId:    doc?.id          ?? "",
+    promptText:  rawText,
+    category:    doc?.category    ?? topic,
+    authorName:  doc?.authorName  ?? "",
+    authorPhoto: doc?.authorPhoto ?? "",
+    fullTitle:   doc?.title       ?? topic,
+  };
+
+  return { title, body, imageUrl: doc?.imageUrl ?? null, extra };
 }
 
-async function sendFcm(tokens, { title, body, imageUrl }) {
+async function sendFcm(tokens, { title, body, imageUrl, extra = {} }) {
   const baseMessage = {
     notification: { title, body, ...(imageUrl ? { image: imageUrl } : {}) },
-    data: { sent_at: Date.now().toString() },
+    data: {
+      sent_at: Date.now().toString(),
+      ...Object.fromEntries(
+        Object.entries(extra ?? {}).map(([k, v]) => [k, String(v)])
+      ),
+    },
     android: {
       priority: "high",
       notification: { channelId: "default", sound: "default", ...(imageUrl ? { imageUrl } : {}) },
