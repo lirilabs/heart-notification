@@ -5,230 +5,253 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FCM Engine · Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --bg:#08090f; --surf:#0d0e1a; --surf2:#111220; --surf3:#181927;
-  --border:#1b1d2e; --border2:#242638;
-  --accent:#5b8dee; --accent2:#7c6df5;
-  --green:#3ddc97; --red:#ff5470; --yellow:#f4c842; --purple:#c084fc; --orange:#fb923c;
-  --text:#d4d8f0; --muted:#434560;
-  --mono:'IBM Plex Mono',monospace; --ui:'Syne',sans-serif;
+  --bg:#07080e;--surf:#0c0d18;--surf2:#10111f;
+  --border:#1c1d30;--border2:#252738;
+  --accent:#4f8ef7;--accent2:#6c5ce7;
+  --green:#00d68f;--red:#ff4d6d;--yellow:#ffd60a;
+  --purple:#b197fc;--orange:#ff6b35;
+  --text:#c8cde8;--text2:#8890b5;
+  --mono:'JetBrains Mono',monospace;--ui:'Space Grotesk',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
-
-/* grid bg */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(rgba(91,141,238,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(91,141,238,.04) 1px,transparent 1px);
-  background-size:52px 52px}
+  background-image:linear-gradient(rgba(79,142,247,.03)1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.03)1px,transparent 1px);
+  background-size:48px 48px;animation:gridDrift 40s linear infinite}
+@keyframes gridDrift{to{background-position:48px 48px}}
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 120px}
 
-.wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:44px 22px 110px}
-
-/* ── topbar ── */
-.topbar{display:flex;align-items:center;gap:14px;margin-bottom:44px;padding-bottom:22px;border-bottom:1px solid var(--border)}
-.logo-mark{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0;
-  background:linear-gradient(135deg,rgba(91,141,238,.18),rgba(124,109,245,.18));
-  border:1px solid rgba(91,141,238,.3);box-shadow:0 0 24px rgba(91,141,238,.15)}
-.logo-text h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
+/* topbar */
+.topbar{display:flex;align-items:center;gap:16px;margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex-shrink:0;background:linear-gradient(135deg,rgba(79,142,247,.2),rgba(108,92,231,.2));border:1px solid rgba(79,142,247,.35);box-shadow:0 0 30px rgba(79,142,247,.12)}
+.logo-text h1{font-size:20px;font-weight:700;color:#fff}
 .logo-text h1 em{color:var(--accent);font-style:normal}
-.logo-text p{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
-.project-tag{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border2);padding:5px 12px;border-radius:20px}
+.logo-text p{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2.5px;text-transform:uppercase;margin-top:4px}
+.proj-badge{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text2);border:1px solid var(--border2);padding:5px 12px;border-radius:30px;background:var(--surf2)}
 
-/* base url */
-.url-bar{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--border2);border-radius:11px;padding:11px 16px;margin-bottom:32px}
-.url-pill{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;background:var(--accent);color:#06070d;padding:3px 8px;border-radius:4px;white-space:nowrap}
-.url-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px}
-.url-bar input::placeholder{color:var(--muted)}
+/* url bar */
+.url-bar{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;margin-bottom:28px;transition:border-color .2s}
+.url-bar:focus-within{border-color:rgba(79,142,247,.5);box-shadow:0 0 0 3px rgba(79,142,247,.08)}
+.url-tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:var(--accent);color:#06070d;padding:3px 9px;border-radius:5px;white-space:nowrap;flex-shrink:0}
+.url-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px;min-width:0}
+.url-bar input::placeholder{color:var(--text2)}
 
 /* stats */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:44px}
-.stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:15px 18px}
-.stat-l{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
-.stat-n{font-size:28px;font-weight:800;margin-top:5px;line-height:1;font-family:var(--mono)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:40px}
+.stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-l{font-family:var(--mono);font-size:8px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.stat-n{font-size:26px;font-weight:700;line-height:1;font-family:var(--mono)}
 .ca{color:var(--accent)}.cg{color:var(--green)}.cr{color:var(--red)}.cy{color:var(--yellow)}
 
-/* section label */
-.sec{display:flex;align-items:center;gap:10px;margin-bottom:13px}
-.sec-n{font-family:var(--mono);font-size:9px;font-weight:600;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;background:var(--accent);color:#06070d}
-.sec-t{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+/* section */
+.sec{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-num{font-family:var(--mono);font-size:9px;font-weight:700;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;background:var(--accent);color:#06070d}
+.sec-title{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--text2)}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
 
 /* card */
-.card{background:var(--surf);border:1px solid var(--border);border-radius:15px;margin-bottom:22px;overflow:hidden;transition:border-color .25s}
-.card:hover{border-color:var(--border2)}
-.card-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:5px}
-.badge.post{background:rgba(61,220,151,.1);color:var(--green);border:1px solid rgba(61,220,151,.22)}
-.badge.get{background:rgba(244,200,66,.1);color:var(--yellow);border:1px solid rgba(244,200,66,.22)}
-.badge.api{background:rgba(91,141,238,.1);color:var(--accent);border:1px solid rgba(91,141,238,.22)}
+.card{background:var(--surf);border:1px solid var(--border);border-radius:16px;margin-bottom:24px;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.card:hover{border-color:var(--border2);box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+.badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 9px;border-radius:5px;letter-spacing:.5px}
+.badge.post{background:rgba(0,214,143,.1);color:var(--green);border:1px solid rgba(0,214,143,.25)}
+.badge.api{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.25)}
 .ep{font-family:var(--mono);font-size:12px}
-.ep-desc{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.ep-desc{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text2)}
 .card-body{padding:22px}
 
 /* fields */
-.field{margin-bottom:13px}
+.field{margin-bottom:14px}
 .field label,.flabel{display:block;font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;font-weight:500}
 .inp{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:9px;padding:11px 15px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
-.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,141,238,.09)}
-.inp::placeholder{color:var(--muted)}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.1)}
+.inp::placeholder{color:var(--text2)}
 
 /* trace */
 .trace{display:flex;flex-direction:column;gap:5px;margin:14px 0}
-.tr{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 12px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);transition:all .2s}
+.tr{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text2);padding:9px 13px;border-radius:9px;background:var(--surf2);border:1px solid var(--border);transition:all .25s}
 .tr .dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .3s}
-.tr.active{color:var(--accent);border-color:rgba(91,141,238,.28);background:rgba(91,141,238,.05)}
-.tr.active .dot{background:var(--accent);box-shadow:0 0 7px var(--accent)}
-.tr.done{color:var(--green);border-color:rgba(61,220,151,.22);background:rgba(61,220,151,.04)}
-.tr.done .dot{background:var(--green);box-shadow:0 0 7px var(--green)}
-.tr.fail{color:var(--red);border-color:rgba(255,84,112,.22);background:rgba(255,84,112,.04)}
-.tr.fail .dot{background:var(--red);box-shadow:0 0 7px var(--red)}
-.tr-val{margin-left:auto;color:var(--purple);font-size:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr.active{color:var(--accent);border-color:rgba(79,142,247,.3);background:rgba(79,142,247,.06)}
+.tr.active .dot{background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1s ease-in-out infinite}
+.tr.done{color:var(--green);border-color:rgba(0,214,143,.25);background:rgba(0,214,143,.05)}
+.tr.done .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+.tr.fail{color:var(--red);border-color:rgba(255,77,109,.25);background:rgba(255,77,109,.05)}
+.tr.fail .dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+.tr-val{margin-left:auto;color:var(--purple);font-size:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* buttons */
-.btn{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border:none;border-radius:10px;cursor:pointer;font-family:var(--ui);font-weight:700;font-size:13px;letter-spacing:.15px;width:100%;transition:opacity .2s,transform .15s;margin-top:16px}
-.btn:disabled{opacity:.32;cursor:not-allowed}
-.btn:hover:not(:disabled){opacity:.85;transform:translateY(-1px)}
-.btn:active:not(:disabled){transform:scale(.99)}
-.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 5px 20px rgba(91,141,238,.28)}
-.btn.green-grad{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 5px 20px rgba(16,185,129,.25)}
-.btn.ghost-r{background:rgba(255,84,112,.1);color:var(--red);border:1px solid rgba(255,84,112,.26);box-shadow:none}
-.btn.ghost-y{background:rgba(244,200,66,.08);color:var(--yellow);border:1px solid rgba(244,200,66,.22);box-shadow:none}
-.btn .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.22);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 20px;border:none;border-radius:10px;cursor:pointer;font-family:var(--ui);font-weight:600;font-size:13px;width:100%;transition:all .2s;margin-top:16px}
+.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(79,142,247,.3)}
+.btn.green-grad{background:linear-gradient(135deg,#00b4d8,#00d68f);color:#06070d;font-weight:700;box-shadow:0 4px 20px rgba(0,214,143,.2)}
+.btn.ghost-y{background:rgba(255,214,10,.08);color:var(--yellow);border:1px solid rgba(255,214,10,.2)}
+.btn .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
 .btn.loading .spin{display:block}
 .btn.loading .lbl{display:none}
 .btn-row{display:flex;gap:8px;margin-top:16px}
 .btn-row .btn{margin-top:0;flex:1}
-.btn-row .btn.sm{flex:0 0 auto;width:auto;padding:13px 17px}
 
-/* ── Schedule slots ── */
-.slots-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.slot-card{background:var(--surf2);border:1px solid var(--border2);border-radius:12px;padding:16px;transition:border-color .2s;position:relative}
-.slot-card.enabled{border-color:rgba(91,141,238,.35);background:rgba(91,141,238,.04)}
-.slot-card.enabled.s2{border-color:rgba(61,220,151,.3);background:rgba(61,220,151,.03)}
-.slot-card.enabled.s3{border-color:rgba(244,200,66,.3);background:rgba(244,200,66,.03)}
-.slot-card.enabled.s4{border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.03)}
+/* ════════════════════════════
+   SLOT CARDS
+════════════════════════════ */
+.slots-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.slot-card{background:var(--surf2);border:1px solid var(--border2);border-radius:14px;padding:18px;transition:all .3s}
+.slot-card.enabled    {border-color:rgba(79,142,247,.4); background:rgba(79,142,247,.05)}
+.slot-card.enabled.s2 {border-color:rgba(0,214,143,.35);background:rgba(0,214,143,.04)}
+.slot-card.enabled.s3 {border-color:rgba(255,214,10,.3);background:rgba(255,214,10,.04)}
+.slot-card.enabled.s4 {border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.04)}
 
-.slot-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.slot-name{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-.slot-card.enabled   .slot-name{color:var(--accent)}
+.slot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.slot-label-group{display:flex;align-items:center;gap:8px}
+.slot-icon{font-size:18px}
+.slot-name{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);font-weight:600}
+.slot-card.enabled    .slot-name{color:var(--accent)}
 .slot-card.enabled.s2 .slot-name{color:var(--green)}
 .slot-card.enabled.s3 .slot-name{color:var(--yellow)}
 .slot-card.enabled.s4 .slot-name{color:var(--orange)}
 
-/* toggle switch */
-.toggle{position:relative;width:38px;height:21px;flex-shrink:0;cursor:pointer}
+/* toggle */
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0;position:absolute}
-.toggle-track{position:absolute;inset:0;border-radius:21px;background:var(--border2);transition:background .2s}
+.toggle-track{position:absolute;inset:0;border-radius:22px;background:var(--border2);transition:background .25s;cursor:pointer}
 .toggle input:checked ~ .toggle-track{background:var(--accent)}
 .slot-card.s2 .toggle input:checked ~ .toggle-track{background:var(--green)}
 .slot-card.s3 .toggle input:checked ~ .toggle-track{background:var(--yellow)}
 .slot-card.s4 .toggle input:checked ~ .toggle-track{background:var(--orange)}
-.toggle-thumb{position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
-.toggle input:checked ~ .toggle-thumb{transform:translateX(17px)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.5);pointer-events:none}
+.toggle input:checked ~ .toggle-thumb{transform:translateX(18px)}
 
-/* time display in slot */
-.slot-time-row{display:flex;align-items:baseline;gap:6px}
-.slot-time-inp{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:22px;font-weight:600;width:90px}
-.slot-card.enabled    .slot-time-inp{color:var(--accent)}
-.slot-card.enabled.s2 .slot-time-inp{color:var(--green)}
-.slot-card.enabled.s3 .slot-time-inp{color:var(--yellow)}
-.slot-card.enabled.s4 .slot-time-inp{color:var(--orange)}
-.slot-time-inp::-webkit-calendar-picker-indicator{filter:invert(.5);opacity:.5;cursor:pointer}
-.slot-tz-label{font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
+/* ── TIME DROPDOWNS ── */
+.time-label{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
 
-.slot-utc{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px}
+.time-dropdowns{display:flex;align-items:center;gap:6px;margin-bottom:10px}
 
-/* tz selector (global) */
-.tz-row{display:flex;align-items:center;gap:12px;background:var(--surf2);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;margin-bottom:14px}
-.tz-row label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
-.tz-sel{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px;cursor:pointer}
+.time-sep{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text2);line-height:1;padding-bottom:2px;user-select:none}
+
+.sel-wrap{position:relative;flex:1}
+.sel-wrap::after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text2);pointer-events:none}
+
+.time-sel{
+  width:100%;
+  background:var(--surf);
+  border:1px solid var(--border2);
+  border-radius:9px;
+  padding:10px 28px 10px 0;
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:22px;
+  font-weight:700;
+  text-align:center;
+  outline:none;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  transition:border-color .2s,box-shadow .2s,color .2s;
+}
+.time-sel:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
+.time-sel option{background:#10111f;font-size:15px;font-weight:400}
+
+/* coloured when slot is enabled */
+.slot-card.enabled    .time-sel{color:var(--accent); border-color:rgba(79,142,247,.35)}
+.slot-card.enabled.s2 .time-sel{color:var(--green);  border-color:rgba(0,214,143,.3)}
+.slot-card.enabled.s3 .time-sel{color:var(--yellow); border-color:rgba(255,214,10,.3)}
+.slot-card.enabled.s4 .time-sel{color:var(--orange); border-color:rgba(255,107,53,.3)}
+.slot-card.enabled    .time-sel:focus{box-shadow:0 0 0 3px rgba(79,142,247,.15)}
+.slot-card.enabled.s2 .time-sel:focus{box-shadow:0 0 0 3px rgba(0,214,143,.12)}
+.slot-card.enabled.s3 .time-sel:focus{box-shadow:0 0 0 3px rgba(255,214,10,.12)}
+.slot-card.enabled.s4 .time-sel:focus{box-shadow:0 0 0 3px rgba(255,107,53,.12)}
+
+.slot-utc{font-family:var(--mono);font-size:9px;color:var(--text2);padding:4px 10px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);display:inline-flex;align-items:center;gap:5px}
+
+/* tz selector */
+.tz-row{display:flex;align-items:center;gap:12px;background:var(--surf2);border:1px solid var(--border2);border-radius:9px;padding:11px 15px;margin-bottom:16px}
+.tz-row label{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+.tz-sel{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px;cursor:pointer;appearance:none}
 .tz-sel option{background:#111220}
 
-/* save status */
-.save-bar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;padding:10px 14px;border-radius:9px;background:var(--surf2);border:1px solid var(--border);margin-bottom:14px;min-height:40px}
-.save-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:all .3s}
-.save-dot.saved{background:var(--green);box-shadow:0 0 7px var(--green)}
-.save-dot.saving{background:var(--yellow);box-shadow:0 0 7px var(--yellow);animation:pulse 1s ease-in-out infinite}
-.save-dot.err{background:var(--red);box-shadow:0 0 7px var(--red)}
-.save-lbl{color:var(--muted)}
+/* save bar */
+.save-bar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;padding:10px 14px;border-radius:9px;background:var(--surf2);border:1px solid var(--border);margin-bottom:14px;min-height:42px}
+.save-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .3s}
+.save-dot.saved{background:var(--green);box-shadow:0 0 8px var(--green)}
+.save-dot.saving{background:var(--yellow);box-shadow:0 0 8px var(--yellow);animation:pulse 1s ease-in-out infinite}
+.save-dot.err{background:var(--red);box-shadow:0 0 8px var(--red)}
+.save-lbl{color:var(--text2)}
 .save-lbl.saved{color:var(--green)}
 .save-lbl.saving{color:var(--yellow)}
 .save-lbl.err{color:var(--red)}
-.save-time{margin-left:auto;color:var(--muted);font-size:10px}
+.save-time{margin-left:auto;color:var(--text2);font-size:10px}
 
-/* next-fire chips */
+/* next fire chips */
 .next-fires{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.fire-chip{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);color:var(--muted)}
-.fire-chip.on{border-color:rgba(91,141,238,.35);color:var(--accent);background:rgba(91,141,238,.06)}
-.fire-chip.on.s2{border-color:rgba(61,220,151,.3);color:var(--green);background:rgba(61,220,151,.05)}
-.fire-chip.on.s3{border-color:rgba(244,200,66,.3);color:var(--yellow);background:rgba(244,200,66,.05)}
-.fire-chip.on.s4{border-color:rgba(251,146,60,.3);color:var(--orange);background:rgba(251,146,60,.05)}
+.fire-chip{font-family:var(--mono);font-size:10px;padding:5px 11px;border-radius:6px;border:1px solid var(--border2);color:var(--text2)}
+.fire-chip.on   {border-color:rgba(79,142,247,.35);color:var(--accent);background:rgba(79,142,247,.07)}
+.fire-chip.on.s2{border-color:rgba(0,214,143,.3);  color:var(--green); background:rgba(0,214,143,.06)}
+.fire-chip.on.s3{border-color:rgba(255,214,10,.3); color:var(--yellow);background:rgba(255,214,10,.05)}
+.fire-chip.on.s4{border-color:rgba(255,107,53,.3); color:var(--orange);background:rgba(255,107,53,.05)}
 
 /* callout */
-.callout{border-radius:9px;padding:12px 15px;margin-bottom:14px;font-size:12px;line-height:1.7}
-.callout.info{background:rgba(91,141,238,.07);border:1px solid rgba(91,141,238,.2)}
-.callout.warn{background:rgba(244,200,66,.06);border:1px solid rgba(244,200,66,.18)}
-.callout.green{background:rgba(61,220,151,.06);border:1px solid rgba(61,220,151,.2)}
-.callout h5{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
-.callout.info  h5{color:var(--accent)}
-.callout.warn  h5{color:var(--yellow)}
-.callout.green h5{color:var(--green)}
-.callout code{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
-.callout ol{margin-left:18px}
-.callout li{margin-bottom:3px}
+.callout{border-radius:10px;padding:13px 16px;margin-bottom:14px;font-size:12px;line-height:1.75}
+.callout.info{background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2)}
+.callout.warn{background:rgba(255,214,10,.05);border:1px solid rgba(255,214,10,.18)}
+.callout h5{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.callout.info h5{color:var(--accent)}
+.callout.warn h5{color:var(--yellow)}
+.callout code{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px}
 
-/* response pane */
+/* response */
 .res{display:none;margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
 .res.show{display:block}
-.res-bar{display:flex;align-items:center;gap:8px;padding:8px 13px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.res-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
 .rdot{width:7px;height:7px;border-radius:50%}
-.rdot.ok{background:var(--green);box-shadow:0 0 5px var(--green)}
-.rdot.err{background:var(--red);box-shadow:0 0 5px var(--red)}
+.rdot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.rdot.err{background:var(--red);box-shadow:0 0 6px var(--red)}
 .rcode.ok{color:var(--green);font-weight:700}
 .rcode.err{color:var(--red);font-weight:700}
-.rms{margin-left:auto;color:var(--muted)}
-pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;color:#636580;background:#070810;overflow-x:auto;max-height:260px;white-space:pre-wrap;word-break:break-all}
+.rms{margin-left:auto;color:var(--text2)}
+pre.rbody{padding:16px;font-family:var(--mono);font-size:11px;line-height:1.9;color:#5a6080;background:#050610;overflow-x:auto;max-height:260px;white-space:pre-wrap;word-break:break-all}
 
-.hr{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:18px 0}
-
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:20px 0}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.slots-grid{grid-template-columns:1fr}.ep-desc{display:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+@media(max-width:580px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .slots-grid{grid-template-columns:1fr}
+  .ep-desc{display:none}
+  .btn-row{flex-direction:column}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- topbar -->
   <div class="topbar">
-    <div class="logo-mark">🔔</div>
+    <div class="logo-icon">🔔</div>
     <div class="logo-text">
       <h1>FCM <em>Engine</em></h1>
       <p>Notification Console</p>
     </div>
-    <div class="project-tag">promora-9ab6e</div>
+    <div class="proj-badge">promora-9ab6e</div>
   </div>
 
-  <!-- base url -->
   <div class="url-bar">
-    <div class="url-pill">BASE URL</div>
+    <div class="url-tag">BASE URL</div>
     <input type="text" id="baseUrl" placeholder="https://your-app.vercel.app"/>
   </div>
 
-  <!-- stats -->
   <div class="stats">
     <div class="stat"><div class="stat-l">API Calls</div><div class="stat-n ca" id="sT">0</div></div>
     <div class="stat"><div class="stat-l">Succeeded</div><div class="stat-n cg" id="sO">0</div></div>
     <div class="stat"><div class="stat-l">Failed</div><div class="stat-n cr" id="sF">0</div></div>
-    <div class="stat"><div class="stat-l">Schedules Active</div><div class="stat-n cy" id="sActive">—</div></div>
+    <div class="stat"><div class="stat-l">Active Slots</div><div class="stat-n cy" id="sActive">—</div></div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════
-       SECTION 1 — Individual: instant send
-  ══════════════════════════════════════════════════════ -->
-  <div class="sec"><span class="sec-n">1</span><span class="sec-t">Individual — Instant Send</span></div>
+  <!-- SECTION 1 -->
+  <div class="sec"><span class="sec-num">1</span><span class="sec-title">Individual — Instant Send</span></div>
   <div class="card">
     <div class="card-head">
       <span class="badge post">POST</span>
@@ -248,7 +271,7 @@ pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;co
         <div class="tr" id="tr5"><div class="dot"></div><span>notificationLog → audit written</span><span class="tr-val" id="tr5v"></span></div>
       </div>
       <button class="btn primary" id="btnStu" onclick="runSendToUser()">
-        <div class="spin"></div><span class="lbl">⚡&nbsp; Send Now</span>
+        <div class="spin"></div><span class="lbl">⚡ Send Now</span>
       </button>
       <div class="res" id="res_stu">
         <div class="res-bar"><div class="rdot" id="rdot_stu"></div><span class="rcode" id="rcode_stu"></span><span id="rlabel_stu"></span><span class="rms" id="rms_stu"></span></div>
@@ -257,14 +280,12 @@ pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;co
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════
-       SECTION 2 — Server-level scheduling (up to 4 slots)
-  ══════════════════════════════════════════════════════ -->
-  <div class="sec"><span class="sec-n">2</span><span class="sec-t">All Users — Server Schedule</span></div>
+  <!-- SECTION 2 -->
+  <div class="sec"><span class="sec-num">2</span><span class="sec-title">All Users — Server Schedule</span></div>
   <div class="card">
     <div class="card-head">
       <span class="badge api">API</span>
-      <span class="ep">/api/schedules &nbsp;+&nbsp; /api/cron/push</span>
+      <span class="ep">/api/schedules + /api/cron/push</span>
       <span class="ep-desc">saved in Firestore · Vercel runs every 30 min</span>
     </div>
     <div class="card-body">
@@ -274,23 +295,20 @@ pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;co
         Times you set here are <strong>saved to Firestore</strong> (<code>config/schedules</code>).
         Vercel runs <code>/api/cron/push</code> every <strong>30 minutes</strong> automatically.
         Each run checks if the current UTC time matches any enabled slot (±28 min window).
-        If it matches, the batch fires. <strong>The HTML page does not need to stay open.</strong>
-        <br/>Also: duplicate devices (same FCM token across different user accounts) receive only <strong>one notification</strong>.
+        <strong>The page does not need to stay open.</strong> Duplicate FCM tokens receive only <strong>one notification</strong>.
       </div>
 
-      <!-- CRON_SECRET -->
       <div class="field">
-        <label>CRON_SECRET &nbsp;<span style="color:var(--muted)">— Vercel env var · leave blank if not set</span></label>
+        <label>CRON_SECRET <span style="color:var(--text2);font-weight:400">— leave blank if not set</span></label>
         <input class="inp" type="password" id="cron_secret" placeholder="Paste your CRON_SECRET value…"/>
       </div>
 
       <div class="hr"/>
 
-      <!-- Timezone selector -->
       <div class="tz-row">
-        <label>Display Timezone</label>
+        <label>Display TZ</label>
         <select class="tz-sel" id="global_tz" onchange="onTzChange()">
-          <option value="Asia/Kolkata" selected>🇮🇳 IST — India (UTC+5:30)</option>
+          <option value="Asia/Kolkata">🇮🇳 IST — India (UTC+5:30)</option>
           <option value="UTC">🌐 UTC</option>
           <option value="America/New_York">🇺🇸 EST — New York (UTC−5)</option>
           <option value="America/Los_Angeles">🇺🇸 PST — Los Angeles (UTC−8)</option>
@@ -302,24 +320,18 @@ pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;co
         </select>
       </div>
 
-      <!-- 4 slot cards -->
-      <div class="flabel" style="margin-bottom:10px">Schedule Slots (up to 4 per day)</div>
-      <div class="slots-grid" id="slotsGrid">
-        <!-- rendered by JS -->
-      </div>
+      <div class="flabel" style="margin-bottom:10px">Schedule Slots — use the dropdowns to set hour &amp; minute</div>
+      <div class="slots-grid" id="slotsGrid"></div>
 
-      <!-- next-fire preview -->
       <div class="flabel" style="margin-bottom:8px">Next Fire Times (UTC)</div>
       <div class="next-fires" id="nextFires">—</div>
 
-      <!-- save status bar -->
       <div class="save-bar">
         <div class="save-dot" id="saveDot"></div>
         <span class="save-lbl" id="saveLbl">Load schedule to begin</span>
         <span class="save-time" id="saveTime"></span>
       </div>
 
-      <!-- action buttons -->
       <div class="btn-row">
         <button class="btn primary" onclick="loadSchedule()">
           <div class="spin"></div><span class="lbl">↓ Load from Server</span>
@@ -331,7 +343,6 @@ pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;co
 
       <div class="hr"/>
 
-      <!-- manual trigger -->
       <div class="flabel" style="margin-bottom:10px">Manual Trigger</div>
       <div class="callout warn" style="margin-bottom:10px">
         <h5>▶ Run batch now</h5>
@@ -348,323 +359,298 @@ pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;co
 
     </div>
   </div>
-
-</div><!-- /wrap -->
+</div>
 
 <script>
-/* ── State ── */
-const DEFAULT_BASE = 'https://heart-notification.vercel.app';
+const DEFAULT_BASE='https://heart-notification.vercel.app';
 let sT=0,sO=0,sF=0;
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-/* Slot definitions: local (display) time + enabled toggle */
-const SLOT_DEFS = [
-  { id:'slot_1', label:'Morning',   color:'s1', defaultLocal:'07:00' },
-  { id:'slot_2', label:'Afternoon', color:'s2', defaultLocal:'12:00' },
-  { id:'slot_3', label:'Evening',   color:'s3', defaultLocal:'17:00' },
-  { id:'slot_4', label:'Night',     color:'s4', defaultLocal:'21:00' },
+const SLOT_DEFS=[
+  {id:'slot_1',label:'Morning',  icon:'🌅',color:'s1',defaultLocal:'07:00'},
+  {id:'slot_2',label:'Afternoon',icon:'☀️', color:'s2',defaultLocal:'12:00'},
+  {id:'slot_3',label:'Evening',  icon:'🌆',color:'s3',defaultLocal:'17:00'},
+  {id:'slot_4',label:'Night',    icon:'🌙',color:'s4',defaultLocal:'21:00'},
 ];
 
-/* Loaded from server */
-let serverSlots = null;
+let serverSlots=null;
 
-/* ── Persist base URL & secret ── */
-window.addEventListener('DOMContentLoaded', () => {
-  $('baseUrl').value      = localStorage.getItem('fcm_base')   || DEFAULT_BASE;
-  $('cron_secret').value  = localStorage.getItem('fcm_secret') || '';
-  $('global_tz').value    = localStorage.getItem('fcm_tz')     || 'Asia/Kolkata';
-
-  $('baseUrl').addEventListener('change',    () => localStorage.setItem('fcm_base',   $('baseUrl').value.trim()));
-  $('cron_secret').addEventListener('change',() => localStorage.setItem('fcm_secret', $('cron_secret').value.trim()));
-  $('global_tz').addEventListener('change',  () => localStorage.setItem('fcm_tz',     $('global_tz').value));
-
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  $('baseUrl').value    =localStorage.getItem('fcm_base')  ||DEFAULT_BASE;
+  $('cron_secret').value=localStorage.getItem('fcm_secret')||'';
+  $('global_tz').value  =localStorage.getItem('fcm_tz')   ||'Asia/Kolkata';
+  $('baseUrl').addEventListener('change',    ()=>localStorage.setItem('fcm_base',  $('baseUrl').value.trim()));
+  $('cron_secret').addEventListener('change',()=>localStorage.setItem('fcm_secret',$('cron_secret').value.trim()));
   renderSlots(defaultSlots());
   loadSchedule();
 });
 
-function base(){ return $('baseUrl').value.trim().replace(/\/$/,'') || DEFAULT_BASE; }
-function secret(){ return $('cron_secret').value.trim(); }
-function tz(){ return $('global_tz').value; }
+function base()  {return $('baseUrl').value.trim().replace(/\/$/,'')||DEFAULT_BASE;}
+function secret(){return $('cron_secret').value.trim();}
+function tz()   {return $('global_tz').value;}
 
-/* ── Stats ── */
-function bump(ok){ sT++; if(ok)sO++; else sF++; $('sT').textContent=sT; $('sO').textContent=sO; $('sF').textContent=sF; }
+/* ── DROPDOWN BUILDERS ── */
+function buildHourOptions(sel){
+  return Array.from({length:24},(_,h)=>{
+    const v=String(h).padStart(2,'0');
+    return `<option value="${h}"${h===sel?' selected':''}>${v}</option>`;
+  }).join('');
+}
+// minutes in 5-min steps
+function buildMinuteOptions(sel){
+  // snap sel to nearest 5
+  const snapped=Math.round(sel/5)*5%60;
+  return Array.from({length:12},(_,i)=>{
+    const m=i*5;
+    const v=String(m).padStart(2,'0');
+    const isSel=m===snapped;
+    return `<option value="${m}"${isSel?' selected':''}>${v}</option>`;
+  }).join('');
+}
 
-/* ── Response pane ── */
-function showRes(id, status, data, ms){
-  const ok = status>=200&&status<300;
+/* ── STATS ── */
+function bump(ok){sT++;if(ok)sO++;else sF++;$('sT').textContent=sT;$('sO').textContent=sO;$('sF').textContent=sF;}
+
+/* ── RESPONSE PANE ── */
+function showRes(id,status,data,ms){
+  const ok=status>=200&&status<300;
   $('res_'+id).classList.add('show');
-  $('rdot_'+id).className    = 'rdot '+(ok?'ok':'err');
-  $('rcode_'+id).className   = 'rcode '+(ok?'ok':'err');
-  $('rcode_'+id).textContent  = status||'ERR';
-  $('rlabel_'+id).textContent = ok?'✓ Success':'✗ Failed';
-  $('rms_'+id).textContent    = ms+'ms';
-  $('rbody_'+id).textContent  = JSON.stringify(data,null,2);
+  $('rdot_'+id).className   ='rdot '+(ok?'ok':'err');
+  $('rcode_'+id).className  ='rcode '+(ok?'ok':'err');
+  $('rcode_'+id).textContent =status||'ERR';
+  $('rlabel_'+id).textContent=ok?' ✓ Success':' ✗ Failed';
+  $('rms_'+id).textContent   =ms+'ms';
+  $('rbody_'+id).textContent =JSON.stringify(data,null,2);
   bump(ok);
 }
 
-/* ── Trace ── */
-function resetTrace(){ for(let i=1;i<=5;i++){ $('tr'+i).className='tr'; $('tr'+i+'v').textContent=''; } }
-function trace(i,s,v=''){ $('tr'+i).className='tr '+s; if(v) $('tr'+i+'v').textContent=v; }
-const delay = ms => new Promise(r=>setTimeout(r,ms));
+/* ── TRACE ── */
+function resetTrace(){for(let i=1;i<=5;i++){$('tr'+i).className='tr';$('tr'+i+'v').textContent='';}}
+function trace(i,s,v=''){$('tr'+i).className='tr '+s;if(v)$('tr'+i+'v').textContent=v;}
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
 
-/* ══════════════════════════════════
-   TZ utilities
-══════════════════════════════════ */
-function getOffsetMins(timezone) {
-  // Get UTC offset in minutes for a given IANA timezone at current moment
-  const now = new Date();
-  const utcStr = now.toLocaleString('en-US', {timeZone:'UTC', hour12:false, hour:'2-digit', minute:'2-digit'});
-  const tzStr  = now.toLocaleString('en-US', {timeZone: timezone, hour12:false, hour:'2-digit', minute:'2-digit'});
-  const toMins = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
-  let diff = toMins(tzStr) - toMins(utcStr);
-  // Handle midnight crossing
-  if(diff > 720)  diff -= 1440;
-  if(diff < -720) diff += 1440;
-  return diff; // positive = east of UTC
+/* ── TZ MATH ── */
+function getOffsetMins(timezone){
+  const now=new Date();
+  const u=now.toLocaleString('en-US',{timeZone:'UTC',      hour12:false,hour:'2-digit',minute:'2-digit'});
+  const t=now.toLocaleString('en-US',{timeZone:timezone,   hour12:false,hour:'2-digit',minute:'2-digit'});
+  const toM=s=>{const[h,m]=s.split(':').map(Number);return h*60+m;};
+  let d=toM(t)-toM(u);
+  if(d>720)d-=1440;if(d<-720)d+=1440;
+  return d;
+}
+function localToUtc(lh,lm,timezone){
+  const off=getOffsetMins(timezone);
+  let u=lh*60+lm-off;
+  u=((u%1440)+1440)%1440;
+  return{utcHour:Math.floor(u/60),utcMinute:u%60};
+}
+function utcToLocal(uh,um,timezone){
+  const off=getOffsetMins(timezone);
+  let l=uh*60+um+off;
+  l=((l%1440)+1440)%1440;
+  return{localHour:Math.floor(l/60),localMinute:l%60};
+}
+function pad(n){return String(n).padStart(2,'0')}
+function fmtUtc(h,m){return `${pad(h)}:${pad(m)}`}
+function tzShort(){
+  return({'Asia/Kolkata':'IST','UTC':'UTC','America/New_York':'EST','America/Los_Angeles':'PST','Europe/London':'GMT','Europe/Paris':'CET','Asia/Singapore':'SGT','Asia/Dubai':'GST','Asia/Tokyo':'JST'})[tz()]||tz();
 }
 
-function localToUtc(localHH, localMM, timezone) {
-  const offset = getOffsetMins(timezone); // minutes east
-  let utcMins = localHH*60 + localMM - offset;
-  utcMins = ((utcMins % 1440) + 1440) % 1440; // wrap 0-1439
-  return { utcHour: Math.floor(utcMins/60), utcMinute: utcMins%60 };
-}
-
-function utcToLocal(utcHour, utcMinute, timezone) {
-  const offset = getOffsetMins(timezone);
-  let localMins = utcHour*60 + utcMinute + offset;
-  localMins = ((localMins % 1440) + 1440) % 1440;
-  return { localHour: Math.floor(localMins/60), localMinute: localMins%60 };
-}
-
-function pad(n){ return String(n).padStart(2,'0'); }
-function fmtUtc(h,m){ return `${pad(h)}:${pad(m)} UTC`; }
-function fmtLocal(h,m){ return `${pad(h)}:${pad(m)}`; }
-
-/* ══════════════════════════════════
-   Slot default builder
-══════════════════════════════════ */
+/* ── DEFAULTS ── */
 function defaultSlots(){
-  return SLOT_DEFS.map(def => {
-    const [lh,lm] = def.defaultLocal.split(':').map(Number);
-    const { utcHour, utcMinute } = localToUtc(lh, lm, tz());
-    return { id:def.id, label:def.label, utcHour, utcMinute, enabled: def.id==='slot_1' };
+  return SLOT_DEFS.map(d=>{
+    const[lh,lm]=d.defaultLocal.split(':').map(Number);
+    const{utcHour,utcMinute}=localToUtc(lh,lm,tz());
+    return{id:d.id,label:d.label,utcHour,utcMinute,enabled:d.id==='slot_1'};
   });
 }
 
-/* ══════════════════════════════════
-   Render slot cards
-══════════════════════════════════ */
+/* ── RENDER SLOTS ── */
 function renderSlots(slots){
-  serverSlots = slots;
-  $('sActive').textContent = slots.filter(s=>s.enabled).length;
+  serverSlots=slots;
+  $('sActive').textContent=slots.filter(s=>s.enabled).length;
+  const grid=$('slotsGrid');
+  grid.innerHTML='';
 
-  const grid = $('slotsGrid');
-  grid.innerHTML = '';
+  slots.forEach((slot,idx)=>{
+    const def=SLOT_DEFS[idx]||SLOT_DEFS[0];
+    const{localHour,localMinute}=utcToLocal(slot.utcHour,slot.utcMinute,tz());
 
-  slots.forEach((slot, idx) => {
-    const def      = SLOT_DEFS[idx] || SLOT_DEFS[idx % SLOT_DEFS.length];
-    const colorCls = def.color;
-    const { localHour, localMinute } = utcToLocal(slot.utcHour, slot.utcMinute, tz());
-    const localVal = `${pad(localHour)}:${pad(localMinute)}`;
+    const card=document.createElement('div');
+    card.className=`slot-card ${def.color} ${slot.enabled?'enabled':''}`;
+    card.dataset.slotId=slot.id;
 
-    const card = document.createElement('div');
-    card.className = `slot-card ${colorCls} ${slot.enabled ? 'enabled' : ''}`;
-    card.dataset.slotId = slot.id;
-
-    card.innerHTML = `
-      <div class="slot-top">
-        <span class="slot-name">${slot.label}</span>
+    card.innerHTML=`
+      <div class="slot-header">
+        <div class="slot-label-group">
+          <span class="slot-icon">${def.icon}</span>
+          <span class="slot-name">${slot.label}</span>
+        </div>
         <label class="toggle">
-          <input type="checkbox" ${slot.enabled ? 'checked' : ''} onchange="onToggle('${slot.id}', this.checked)"/>
+          <input type="checkbox" id="tog_${slot.id}" ${slot.enabled?'checked':''}/>
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
         </label>
       </div>
-      <div class="slot-time-row">
-        <input class="slot-time-inp" type="time" value="${localVal}"
-          onchange="onTimeChange('${slot.id}', this.value)"
-          data-slot="${slot.id}"/>
-        <span class="slot-tz-label">${tzShortName()}</span>
+
+      <div class="time-label">${tzShort()} time</div>
+      <div class="time-dropdowns">
+        <div class="sel-wrap">
+          <select class="time-sel" id="hr_${slot.id}">
+            ${buildHourOptions(localHour)}
+          </select>
+        </div>
+        <span class="time-sep">:</span>
+        <div class="sel-wrap">
+          <select class="time-sel" id="mn_${slot.id}">
+            ${buildMinuteOptions(localMinute)}
+          </select>
+        </div>
       </div>
-      <div class="slot-utc" id="utclabel_${slot.id}">${fmtUtc(slot.utcHour, slot.utcMinute)}</div>
+      <div class="slot-utc" id="utc_${slot.id}">→ UTC &nbsp; ${fmtUtc(slot.utcHour,slot.utcMinute)}</div>
     `;
 
     grid.appendChild(card);
+
+    // Attach events AFTER DOM insert
+    card.querySelector(`#tog_${slot.id}`).addEventListener('change',function(){
+      onToggle(slot.id,this.checked,card);
+    });
+    const updateTime=()=>onDropdownChange(slot.id,card);
+    card.querySelector(`#hr_${slot.id}`).addEventListener('change',updateTime);
+    card.querySelector(`#mn_${slot.id}`).addEventListener('change',updateTime);
   });
 
   renderNextFires(slots);
 }
 
-function tzShortName(){
-  const z = tz();
-  const map = {
-    'Asia/Kolkata':'IST','UTC':'UTC','America/New_York':'EST',
-    'America/Los_Angeles':'PST','Europe/London':'GMT','Europe/Paris':'CET',
-    'Asia/Singapore':'SGT','Asia/Dubai':'GST','Asia/Tokyo':'JST'
-  };
-  return map[z] || z;
-}
-
-function onToggle(slotId, checked){
-  const slot = serverSlots.find(s=>s.id===slotId);
-  if(slot) slot.enabled = checked;
-  // Update card class
-  const card = document.querySelector(`[data-slot-id="${slotId}"]`);
-  if(card) card.classList.toggle('enabled', checked);
-  $('sActive').textContent = serverSlots.filter(s=>s.enabled).length;
+/* ── HANDLERS ── */
+function onToggle(slotId,checked,card){
+  const s=serverSlots.find(x=>x.id===slotId);
+  if(s)s.enabled=checked;
+  card.classList.toggle('enabled',checked);
+  $('sActive').textContent=serverSlots.filter(s=>s.enabled).length;
   renderNextFires(serverSlots);
   setSaveStatus('unsaved','Unsaved changes — click Save to push to server');
 }
 
-function onTimeChange(slotId, localVal){
-  const [lh,lm] = localVal.split(':').map(Number);
-  const { utcHour, utcMinute } = localToUtc(lh, lm, tz());
-  const slot = serverSlots.find(s=>s.id===slotId);
-  if(slot){ slot.utcHour=utcHour; slot.utcMinute=utcMinute; }
-  const lbl = $('utclabel_'+slotId);
-  if(lbl) lbl.textContent = fmtUtc(utcHour, utcMinute);
+function onDropdownChange(slotId,card){
+  const lh=parseInt($('hr_'+slotId).value,10);
+  const lm=parseInt($('mn_'+slotId).value,10);
+  const{utcHour,utcMinute}=localToUtc(lh,lm,tz());
+  const s=serverSlots.find(x=>x.id===slotId);
+  if(s){s.utcHour=utcHour;s.utcMinute=utcMinute;}
+  const lbl=$('utc_'+slotId);
+  if(lbl)lbl.textContent=`→ UTC   ${fmtUtc(utcHour,utcMinute)}`;
   renderNextFires(serverSlots);
   setSaveStatus('unsaved','Unsaved changes — click Save to push to server');
 }
 
 function onTzChange(){
-  localStorage.setItem('fcm_tz', tz());
-  if(serverSlots) renderSlots(serverSlots);
+  localStorage.setItem('fcm_tz',tz());
+  if(serverSlots)renderSlots(serverSlots);
 }
 
-/* ── Next fire time chips ── */
+/* ── NEXT FIRE ── */
 function renderNextFires(slots){
-  const container = $('nextFires');
-  const enabled = slots.filter(s=>s.enabled);
-  if(!enabled.length){ container.innerHTML = '<span class="fire-chip">No slots enabled</span>'; return; }
-  container.innerHTML = enabled.map((slot,i)=>{
-    const def = SLOT_DEFS.find(d=>d.id===slot.id) || {};
-    const cls = def.color === 's1' ? '' : def.color;
-    return `<span class="fire-chip on ${cls}">
-      ${slot.label}: ${fmtUtc(slot.utcHour, slot.utcMinute)}
-    </span>`;
+  const c=$('nextFires');
+  const on=slots.filter(s=>s.enabled);
+  if(!on.length){c.innerHTML='<span class="fire-chip">No slots enabled</span>';return;}
+  c.innerHTML=on.map(s=>{
+    const d=SLOT_DEFS.find(x=>x.id===s.id)||{};
+    const cl=d.color==='s1'?'':d.color;
+    return`<span class="fire-chip on ${cl}">${d.icon||''} ${s.label} &nbsp; ${fmtUtc(s.utcHour,s.utcMinute)} UTC</span>`;
   }).join('');
 }
 
-/* ── Save status helper ── */
-function setSaveStatus(state, text, time=''){
-  const dot = $('saveDot'); const lbl = $('saveLbl');
-  dot.className = 'save-dot' + (state && state!=='unsaved' ? ' '+state : '');
-  lbl.className = 'save-lbl' + (state && state!=='unsaved' ? ' '+state : '');
-  lbl.textContent = text;
-  $('saveTime').textContent = time;
+/* ── SAVE STATUS ── */
+function setSaveStatus(state,text,time=''){
+  const dot=$('saveDot'),lbl=$('saveLbl');
+  dot.className='save-dot'+(state&&state!=='unsaved'?' '+state:'');
+  lbl.className='save-lbl'+(state&&state!=='unsaved'?' '+state:'');
+  lbl.textContent=text;$('saveTime').textContent=time;
 }
 
-/* ══════════════════════════════════
-   LOAD schedule from server
-══════════════════════════════════ */
+/* ── LOAD ── */
 async function loadSchedule(){
   setSaveStatus('saving','Loading from server…');
   try{
-    const res  = await fetch(base()+'/api/schedules', { headers: secret() ? {Authorization:'Bearer '+secret()} : {} });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || res.statusText);
-
-    // Merge returned TZ if present
-    if(data.timezone) $('global_tz').value = data.timezone;
-
-    renderSlots(data.slots || defaultSlots());
-    setSaveStatus('saved','Loaded from server', data.updatedAt ? '(saved: '+new Date(data.updatedAt).toLocaleTimeString()+')' : '');
-  } catch(e){
+    const res=await fetch(base()+'/api/schedules',{headers:secret()?{Authorization:'Bearer '+secret()}:{}});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||res.statusText);
+    if(data.timezone)$('global_tz').value=data.timezone;
+    renderSlots(data.slots||defaultSlots());
+    setSaveStatus('saved','Loaded from server',data.updatedAt?'('+new Date(data.updatedAt).toLocaleTimeString()+')':'');
+  }catch(e){
     setSaveStatus('err','Failed to load: '+e.message);
+    if(!serverSlots)renderSlots(defaultSlots());
   }
 }
 
-/* ══════════════════════════════════
-   SAVE schedule to server
-══════════════════════════════════ */
+/* ── SAVE ── */
 async function saveSchedule(){
-  if(!serverSlots){ alert('Load the schedule first'); return; }
-  const btn = $('btnSave');
-  btn.disabled=true; btn.classList.add('loading');
+  if(!serverSlots){alert('Load the schedule first');return;}
+  const btn=$('btnSave');btn.disabled=true;btn.classList.add('loading');
   setSaveStatus('saving','Saving to Firestore…');
-
   const t0=Date.now();
   try{
-    const res  = await fetch(base()+'/api/schedules', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', ...(secret() ? {Authorization:'Bearer '+secret()} : {}) },
-      body: JSON.stringify({ slots: serverSlots, timezone: tz() })
+    const res=await fetch(base()+'/api/schedules',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',...(secret()?{Authorization:'Bearer '+secret()}:{})},
+      body:JSON.stringify({slots:serverSlots,timezone:tz()})
     });
-    const data = await res.json();
-    const ms   = Date.now()-t0;
-    showRes('cron', res.status, data, ms);  // reuse cron res pane for save response
-
-    if(!res.ok) throw new Error(data.error || res.statusText);
-
-    setSaveStatus('saved','✓ Saved to server — Vercel cron will fire at scheduled times', new Date().toLocaleTimeString());
-    $('sActive').textContent = serverSlots.filter(s=>s.enabled).length;
-  } catch(e){
-    setSaveStatus('err','Save failed: '+e.message);
-  } finally {
-    btn.disabled=false; btn.classList.remove('loading');
-  }
+    const data=await res.json();
+    showRes('cron',res.status,data,Date.now()-t0);
+    if(!res.ok)throw new Error(data.error||res.statusText);
+    setSaveStatus('saved','✓ Saved — Vercel cron will fire at scheduled times',new Date().toLocaleTimeString());
+  }catch(e){setSaveStatus('err','Save failed: '+e.message);}
+  finally{btn.disabled=false;btn.classList.remove('loading');}
 }
 
-/* ══════════════════════════════════
-   RUN BATCH NOW (bypass schedule)
-══════════════════════════════════ */
+/* ── RUN NOW ── */
 async function runBatchNow(){
-  const btn=$('btnNow');
-  btn.disabled=true; btn.classList.add('loading');
+  const btn=$('btnNow');btn.disabled=true;btn.classList.add('loading');
   const t0=Date.now();
   try{
-    // Pass ?force=1 so the server can skip the time-window check
-    const res  = await fetch(base()+'/api/cron/push?force=1', {
-      method:'GET',
-      headers: secret() ? {Authorization:'Bearer '+secret()} : {}
-    });
-    const data = await res.json().catch(()=>({}));
-    showRes('cron', res.status, data, Date.now()-t0);
-  } catch(e){
-    showRes('cron', 0, {error:e.message}, Date.now()-t0);
-  } finally {
-    btn.disabled=false; btn.classList.remove('loading');
-  }
+    const res=await fetch(base()+'/api/cron/push?force=1',{method:'GET',headers:secret()?{Authorization:'Bearer '+secret()}:{}});
+    const data=await res.json().catch(()=>({}));
+    showRes('cron',res.status,data,Date.now()-t0);
+  }catch(e){showRes('cron',0,{error:e.message},Date.now()-t0);}
+  finally{btn.disabled=false;btn.classList.remove('loading');}
 }
 
-/* ══════════════════════════════════
-   INDIVIDUAL SEND
-══════════════════════════════════ */
+/* ── INDIVIDUAL SEND ── */
 async function runSendToUser(){
-  const uid = $('uid_input').value.trim();
-  if(!uid){ alert('Enter a UID first'); return; }
-  const btn=$('btnStu');
-  btn.disabled=true; btn.classList.add('loading');
+  const uid=$('uid_input').value.trim();
+  if(!uid){alert('Enter a UID first');return;}
+  const btn=$('btnStu');btn.disabled=true;btn.classList.add('loading');
   resetTrace();
-  trace(1,'active'); await delay(250);
-  trace(1,'done','reading…'); trace(2,'active'); await delay(250);
-  trace(2,'done','reading…'); trace(3,'active'); await delay(250);
-  trace(3,'done','reading…'); trace(4,'active');
+  trace(1,'active');await delay(220);
+  trace(1,'done','reading…');trace(2,'active');await delay(220);
+  trace(2,'done','reading…');trace(3,'active');await delay(220);
+  trace(3,'done','reading…');trace(4,'active');
   const t0=Date.now();
   try{
-    const res  = await fetch(base()+'/api/send-to-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid})});
-    const data = await res.json().catch(()=>({}));
-    const ms   = Date.now()-t0;
-    const ok   = res.status>=200&&res.status<300;
-    const r    = data?.result??{};
+    const res=await fetch(base()+'/api/send-to-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid})});
+    const data=await res.json().catch(()=>({}));
+    const ms=Date.now()-t0;
+    const ok=res.status>=200&&res.status<300;
+    const r=data?.result??{};
     if(ok){
-      trace(1,'done','✓ token'); trace(2,'done',r.topic?'✓ '+r.topic:'✓ found');
-      trace(3,'done','✓ loaded'); trace(4,'done','✓ '+(r.success?.length??1)+' sent'); trace(5,'done','✓ logged');
-    } else {
-      trace(1,'done'); trace(2,'done'); trace(3,'done');
-      trace(4,'fail','✗ '+(r.reason??data?.error??'see response')); trace(5,'fail');
+      trace(1,'done','✓ token');trace(2,'done',r.topic?'✓ '+r.topic:'✓ found');
+      trace(3,'done','✓ loaded');trace(4,'done','✓ '+(r.success?.length??1)+' sent');trace(5,'done','✓ logged');
+    }else{
+      trace(1,'done');trace(2,'done');trace(3,'done');
+      trace(4,'fail','✗ '+(r.reason??data?.error??'see response'));trace(5,'fail');
     }
-    showRes('stu', res.status, data, ms);
-  } catch(e){
-    trace(4,'fail'); trace(5,'fail');
-    showRes('stu', 0, {error:e.message}, Date.now()-t0);
-  } finally {
-    btn.disabled=false; btn.classList.remove('loading');
-  }
+    showRes('stu',res.status,data,ms);
+  }catch(e){
+    trace(4,'fail');trace(5,'fail');
+    showRes('stu',0,{error:e.message},Date.now()-t0);
+  }finally{btn.disabled=false;btn.classList.remove('loading');}
 }
 </script>
 </body>
 </html>
-    
