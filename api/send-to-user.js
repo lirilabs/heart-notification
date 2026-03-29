@@ -65,8 +65,11 @@ async function getUserPayload(uid) {
 }
 
 /**
- * prompts — query by category field, pick a random doc
- * Each doc has: { category, title, promptText, authorName, authorPhoto, ... }
+ * prompts — query by category, pick a random doc
+ * Builds a Pinterest-style notification:
+ *   title   = prompt's own title (no category label)
+ *   body    = first ~120 chars of promptText as a teaser
+ *   image   = first entry in the images[] array (base64 → data URI)
  */
 async function getPrompt(topic) {
   const snap = await db
@@ -76,29 +79,40 @@ async function getPrompt(topic) {
 
   if (snap.empty) return { error: `no_prompt_for_topic:${topic}` };
 
-  // Pick a random document from the results
   const docs = snap.docs;
   const doc  = docs[Math.floor(Math.random() * docs.length)].data();
 
-  // Notification title: "🔥 Daily Development Prompt"
-  const title = `🔥 Daily ${topic} Prompt`;
+  // ── Title: use the prompt's own title, clean and simple ──
+  const title = doc?.title ?? topic;
 
-  // Notification body: the actual prompt text (trimmed to 200 chars for preview)
+  // ── Body: first 120 chars of promptText as a teaser ──
   const rawText = doc?.promptText ?? doc?.body ?? null;
   if (!rawText) return { error: "prompt_body_empty" };
 
-  const body = rawText.length > 200 ? rawText.slice(0, 197) + "…" : rawText;
+  // Take first 120 chars, break at last space so no word is cut
+  const preview = rawText.slice(0, 120);
+  const body = rawText.length > 120
+    ? (preview.lastIndexOf(" ") > 60 ? preview.slice(0, preview.lastIndexOf(" ")) : preview) + "…"
+    : rawText;
 
-  // Extra data fields sent to the app (accessible in-app when tapped)
+  // ── Image: first item in images[] array (base64 WebP/PNG stored in Firestore) ──
+  // FCM image must be a public URL — base64 can't be sent directly.
+  // We pass the base64 as a data field so the app can render it on the notification.
+  const images = doc?.images ?? [];
+  const base64Image = images.length > 0 ? images[0] : null;
+
+  // ── Extra data payload (available when user taps the notification) ──
   const extra = {
-    promptId:   doc?.id         ?? "",
-    promptText: rawText,
-    category:   doc?.category   ?? topic,
-    authorName: doc?.authorName ?? "",
-    authorPhoto:doc?.authorPhoto?? "",
-    fullTitle:  doc?.title      ?? topic,
+    promptId:    doc?.id          ?? "",
+    promptText:  rawText,
+    category:    doc?.category    ?? topic,
+    authorName:  doc?.authorName  ?? "",
+    authorPhoto: doc?.authorPhoto ?? "",
+    ...(base64Image ? { imageBase64: base64Image } : {}),
   };
 
+  // imageUrl must be a public https URL for FCM — skip base64 for notification image
+  // but pass it in data so the app can show it as a rich notification locally
   return { title, body, imageUrl: doc?.imageUrl ?? null, extra };
 }
 
