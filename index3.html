@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FCM Engine · Test Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #07080d;
+    --surface: #0f1017;
+    --surface2: #13141d;
+    --border: #1c1d2b;
+    --border2: #252637;
+    --accent: #00e5ff;
+    --accent-dim: rgba(0,229,255,.12);
+    --green: #00ff88;
+    --red: #ff4560;
+    --yellow: #ffd166;
+    --purple: #bd93f9;
+    --text: #dde1f0;
+    --muted: #555870;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Outfit', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,229,255,.012) 2px, rgba(0,229,255,.012) 4px
+    );
+  }
+
+  .shell { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 44px 20px 100px; }
+
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 42px; padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .icon {
+    width: 42px; height: 42px; border-radius: 9px; flex-shrink: 0;
+    background: var(--accent-dim); border: 1px solid rgba(0,229,255,.25);
+    display: grid; place-items: center; font-size: 20px;
+    box-shadow: 0 0 18px rgba(0,229,255,.18);
+  }
+  .topbar h1 { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+  .topbar h1 em { color: var(--accent); font-style: normal; }
+  .chip {
+    margin-left: auto; font-family: var(--mono); font-size: 10px;
+    color: var(--muted); border: 1px solid var(--border2);
+    padding: 4px 10px; border-radius: 20px; letter-spacing: .5px;
+  }
+
+  .url-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 32px;
+  }
+  .url-row span { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; }
+  .url-row input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: var(--mono); font-size: 12px;
+  }
+  .url-row input::placeholder { color: var(--muted); }
+
+  .step-label {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .step-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .step-label .num {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid var(--border2); display: grid; place-items: center;
+    font-size: 10px; color: var(--accent); flex-shrink: 0;
+  }
+
+  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 32px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 14px 18px; }
+  .stat-l { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+  .stat-n { font-size: 28px; font-weight: 800; margin-top: 5px; line-height: 1; }
+  .c { color: var(--accent); } .g { color: var(--green); } .r { color: var(--red); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; margin-bottom: 20px;
+    transition: border-color .25s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-top {
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .method-tag {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 5px;
+    background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.2);
+  }
+  .method-tag.get { background: rgba(255,209,102,.1); color: var(--yellow); border-color: rgba(255,209,102,.2); }
+  .ep { font-family: var(--mono); font-size: 13px; }
+  .ep-desc { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .card-body { padding: 22px; }
+
+  .uid-wrap label { display: block; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 8px; }
+  .uid-input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 13px 16px; color: var(--text);
+    font-family: var(--mono); font-size: 14px; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .uid-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,.08); }
+  .uid-input::placeholder { color: var(--muted); }
+
+  .flow-trace { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+  .trace-step {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    padding: 8px 12px; border-radius: 7px;
+    background: var(--surface2); border: 1px solid var(--border);
+    transition: all .3s;
+  }
+  .trace-step .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; transition: background .3s, box-shadow .3s; }
+  .trace-step.active .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .trace-step.done   .dot { background: var(--green);  box-shadow: 0 0 8px var(--green); }
+  .trace-step.fail   .dot { background: var(--red);    box-shadow: 0 0 8px var(--red); }
+  .trace-step.active { color: var(--accent); border-color: rgba(0,229,255,.2); background: rgba(0,229,255,.04); }
+  .trace-step.done   { color: var(--green);  border-color: rgba(0,255,136,.2); background: rgba(0,255,136,.04); }
+  .trace-step.fail   { color: var(--red);    border-color: rgba(255,69,96,.2);  background: rgba(255,69,96,.04); }
+  .trace-val { margin-left: auto; color: var(--purple); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+
+  .send-btn {
+    margin-top: 18px; width: 100%; padding: 13px; border: none; border-radius: 10px; cursor: pointer;
+    font-family: var(--sans); font-weight: 700; font-size: 14px;
+    background: linear-gradient(135deg, #00c9e0, #0077ff); color: #fff; letter-spacing: .3px;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    transition: opacity .2s, transform .15s; box-shadow: 0 4px 20px rgba(0,200,255,.2);
+  }
+  .send-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+  .send-btn:active:not(:disabled) { transform: scale(.99); }
+  .send-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .send-btn .spin {
+    width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff; border-radius: 50%; display: none;
+    animation: spin .7s linear infinite;
+  }
+  .send-btn.loading .spin { display: block; }
+  .send-btn.loading .btn-label { display: none; }
+
+  .cron-hint {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    background: rgba(255,209,102,.06); border: 1px solid rgba(255,209,102,.15);
+    padding: 9px 14px; border-radius: 8px; margin-bottom: 16px; line-height: 1.6;
+  }
+  .cron-hint b { color: var(--yellow); font-weight: 500; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 7px; }
+  .field input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 10px 14px; color: var(--text);
+    font-family: var(--mono); font-size: 12px; outline: none; transition: border-color .2s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--muted); }
+
+  .res-pane { display: none; margin-top: 18px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .res-pane.show { display: block; }
+  .res-bar {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 14px; background: rgba(255,255,255,.025);
+    border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px;
+  }
+  .rdot { width: 7px; height: 7px; border-radius: 50%; }
+  .rdot.ok  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .rdot.err { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+  .rcode { font-weight: 700; }
+  .rcode.ok { color: var(--green); }
+  .rcode.err { color: var(--red); }
+  .rms { margin-left: auto; color: var(--muted); }
+  pre.rbody {
+    padding: 16px; font-family: var(--mono); font-size: 11px; line-height: 1.8;
+    color: #7f8ab0; background: #090a10; overflow-x: auto;
+    max-height: 300px; white-space: pre-wrap; word-break: break-all;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media(max-width:520px){ .stats { grid-template-columns: 1fr; } .ep-desc { display: none; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="icon">🔔</div>
+    <h1>FCM Engine <em>Console</em></h1>
+    <div class="chip">promora-9ab6e</div>
+  </div>
+
+  <div class="url-row">
+    <span>BASE&nbsp;URL</span>
+    <input type="text" id="baseUrl" placeholder="https://your-project.vercel.app"/>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-l">Total Calls</div><div class="stat-n c" id="sT">0</div></div>
+    <div class="stat"><div class="stat-l">Succeeded</div><div class="stat-n g" id="sO">0</div></div>
+    <div class="stat"><div class="stat-l">Failed</div><div class="stat-n r" id="sF">0</div></div>
+  </div>
+
+  <!-- ── 1. UID → Auto Everything ── -->
+  <div class="step-label"><span class="num">1</span>Auto Send by UID</div>
+  <div class="card">
+    <div class="card-top">
+      <span class="method-tag">POST</span>
+      <span class="ep">/api/send-to-user</span>
+      <span class="ep-desc">token · category · prompt — all fetched server-side</span>
+    </div>
+    <div class="card-body">
+      <div class="uid-wrap">
+        <label>USER UID *</label>
+        <input class="uid-input" type="text" id="uid_input" placeholder="Paste Firestore user UID here…"/>
+      </div>
+
+      <div class="flow-trace">
+        <div class="trace-step" id="tr1"><div class="dot"></div><span>users/{uid} → fcmToken</span><span class="trace-val" id="tr1v"></span></div>
+        <div class="trace-step" id="tr2"><div class="dot"></div><span>users/{uid}/personalizedCategory → topic</span><span class="trace-val" id="tr2v"></span></div>
+        <div class="trace-step" id="tr3"><div class="dot"></div><span>prompts/{topic} → title + message</span><span class="trace-val" id="tr3v"></span></div>
+        <div class="trace-step" id="tr4"><div class="dot"></div><span>FCM → push notification sent</span><span class="trace-val" id="tr4v"></span></div>
+        <div class="trace-step" id="tr5"><div class="dot"></div><span>users/{uid}/notificationLog → audit written</span><span class="trace-val" id="tr5v"></span></div>
+      </div>
+
+      <button class="send-btn" id="btnStu" onclick="runSendToUser()">
+        <div class="spin"></div>
+        <span class="btn-label">⚡ Send Notification</span>
+      </button>
+
+      <div class="res-pane" id="res_stu">
+        <div class="res-bar">
+          <div class="rdot" id="rdot_stu"></div>
+          <span class="rcode" id="rcode_stu"></span>
+          <span id="rlabel_stu"></span>
+          <span class="rms" id="rms_stu"></span>
+        </div>
+        <pre class="rbody" id="rbody_stu"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. Morning Batch ── -->
+  <div class="step-label"><span class="num">2</span>Trigger Morning Batch</div>
+  <div class="card">
+    <div class="card-top">
+      <span class="method-tag get">GET</span>
+      <span class="ep">/api/cron/morning-push</span>
+      <span class="ep-desc">Sends to all users — runs auto at 12 PM IST</span>
+    </div>
+    <div class="card-body">
+      <div class="cron-hint">
+        Vercel fires this automatically at <b>06:30 UTC → 12:00 PM IST</b> every day.<br/>
+        Hit the button below to trigger it manually for testing.
+      </div>
+      <div class="field">
+        <label>CRON_SECRET</label>
+        <input type="text" id="cron_secret" placeholder="from your Vercel env vars"/>
+      </div>
+      <button class="send-btn" id="btnCron" onclick="runCron()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 4px 20px rgba(124,58,237,.25)">
+        <div class="spin"></div>
+        <span class="btn-label">▶ Run Morning Batch</span>
+      </button>
+      <div class="res-pane" id="res_cron">
+        <div class="res-bar">
+          <div class="rdot" id="rdot_cron"></div>
+          <span class="rcode" id="rcode_cron"></span>
+          <span id="rlabel_cron"></span>
+          <span class="rms" id="rms_cron"></span>
+        </div>
+        <pre class="rbody" id="rbody_cron"></pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let sT=0,sO=0,sF=0;
+  const $=id=>document.getElementById(id);
+  function base(){ return $('baseUrl').value.trim().replace(/\/$/,''); }
+
+  function resetTrace(){
+    for(let i=1;i<=5;i++){ $('tr'+i).className='trace-step'; $('tr'+i+'v').textContent=''; }
+  }
+  function trace(i,state,val=''){
+    $('tr'+i).className='trace-step '+state;
+    if(val) $('tr'+i+'v').textContent=val;
+  }
+
+  function showRes(id,status,data,ms){
+    const ok=status>=200&&status<300;
+    $('res_'+id).classList.add('show');
+    $('rdot_'+id).className='rdot '+(ok?'ok':'err');
+    $('rcode_'+id).className='rcode '+(ok?'ok':'err');
+    $('rcode_'+id).textContent=status||'ERR';
+    $('rlabel_'+id).textContent=ok?'✓ Success':'✗ Failed';
+    $('rms_'+id).textContent=ms+'ms';
+    $('rbody_'+id).textContent=JSON.stringify(data,null,2);
+    sT++;if(ok)sO++;else sF++;
+    $('sT').textContent=sT;$('sO').textContent=sO;$('sF').textContent=sF;
+  }
+
+  function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  async function runSendToUser(){
+    const uid=$('uid_input').value.trim();
+    if(!uid){alert('Enter a UID first');return;}
+    if(!base()){alert('Set the Base URL first');return;}
+    const btn=$('btnStu');
+    btn.disabled=true;btn.classList.add('loading');
+    resetTrace();
+
+    // Animate trace to show what's happening on the server
+    trace(1,'active');
+    await delay(300);
+    trace(1,'done','reading…');trace(2,'active');
+    await delay(300);
+    trace(2,'done','reading…');trace(3,'active');
+    await delay(300);
+    trace(3,'done','reading…');trace(4,'active');
+
+    const t0=Date.now();
+    try{
+      const res=await fetch(base()+'/api/send-to-user',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({uid})
+      });
+      const data=await res.json().catch(()=>({}));
+      const ms=Date.now()-t0;
+      const ok=res.status>=200&&res.status<300;
+      const r=data?.result??{};
+
+      if(ok){
+        trace(1,'done','✓ token found');
+        trace(2,'done',r.topic?'✓ '+r.topic:'✓ found');
+        trace(3,'done','✓ prompt loaded');
+        trace(4,'done','✓ '+(r.success?.length??1)+' sent');
+        trace(5,'done','✓ logged');
+      } else {
+        const why=r.reason??data?.error??'check response';
+        trace(1,'done');trace(2,'done');trace(3,'done');
+        trace(4,'fail','✗ '+why);trace(5,'fail');
+      }
+      showRes('stu',res.status,data,ms);
+    }catch(e){
+      trace(4,'fail');trace(5,'fail');
+      showRes('stu',0,{error:e.message},Date.now()-t0);
+    }finally{
+      btn.disabled=false;btn.classList.remove('loading');
+    }
+  }
+
+  async function runCron(){
+    if(!base()){alert('Set the Base URL first');return;}
+    const secret=$('cron_secret').value.trim();
+    const btn=$('btnCron');
+    btn.disabled=true;btn.classList.add('loading');
+    const t0=Date.now();
+    try{
+      const res=await fetch(base()+'/api/cron/morning-push',{
+        method:'GET',
+        headers:secret?{Authorization:'Bearer '+secret}:{}
+      });
+      const data=await res.json().catch(()=>({}));
+      showRes('cron',res.status,data,Date.now()-t0);
+    }catch(e){
+      showRes('cron',0,{error:e.message},Date.now()-t0);
+    }finally{
+      btn.disabled=false;btn.classList.remove('loading');
+    }
+  }
+</script>
+</body>
+</html>
