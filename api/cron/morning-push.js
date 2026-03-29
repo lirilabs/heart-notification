@@ -86,11 +86,17 @@ async function getPrompt(topic) {
   const docs = snap.docs;
   const doc  = docs[Math.floor(Math.random() * docs.length)].data();
 
-  const title   = `🔥 Daily ${topic} Prompt`;
+  const title   = doc?.title ?? topic;
   const rawText = doc?.promptText ?? doc?.body ?? null;
   if (!rawText) return { error: "prompt_body_empty" };
 
-  const body = rawText.length > 200 ? rawText.slice(0, 197) + "…" : rawText;
+  const preview = rawText.slice(0, 120);
+  const body = rawText.length > 120
+    ? (preview.lastIndexOf(" ") > 60 ? preview.slice(0, preview.lastIndexOf(" ")) : preview) + "…"
+    : rawText;
+
+  const images = doc?.images ?? [];
+  const base64Image = images.length > 0 ? images[0] : null;
 
   const extra = {
     promptId:    doc?.id          ?? "",
@@ -98,7 +104,7 @@ async function getPrompt(topic) {
     category:    doc?.category    ?? topic,
     authorName:  doc?.authorName  ?? "",
     authorPhoto: doc?.authorPhoto ?? "",
-    fullTitle:   doc?.title       ?? topic,
+    ...(base64Image ? { imageBase64: base64Image } : {}),
   };
 
   return { title, body, imageUrl: doc?.imageUrl ?? null, extra };
