@@ -209,7 +209,7 @@
 
   <div class="url-row">
     <span>BASE&nbsp;URL</span>
-    <input type="text" id="baseUrl" placeholder="https://your-project.vercel.app"/>
+    <input type="text" id="baseUrl" value="https://heart-notification.vercel.app"/>
   </div>
 
   <div class="stats">
@@ -268,11 +268,11 @@
     <div class="card-body">
       <div class="cron-hint">
         Vercel fires this automatically at <b>06:30 UTC → 12:00 PM IST</b> every day.<br/>
-        Hit the button below to trigger it manually for testing.
+        Schedule: <b>30 6 * * *</b> — Hit the button below to trigger it manually for testing.
       </div>
       <div class="field">
         <label>CRON_SECRET</label>
-        <input type="text" id="cron_secret" placeholder="from your Vercel env vars"/>
+        <input type="text" id="cron_secret" placeholder="from your Vercel env vars (leave blank if not set)"/>
       </div>
       <button class="send-btn" id="btnCron" onclick="runCron()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 4px 20px rgba(124,58,237,.25)">
         <div class="spin"></div>
@@ -293,9 +293,28 @@
 </div>
 
 <script>
+  const DEFAULT_BASE = 'https://heart-notification.vercel.app';
+
   let sT=0,sO=0,sF=0;
   const $=id=>document.getElementById(id);
-  function base(){ return $('baseUrl').value.trim().replace(/\/$/,''); }
+
+  // Set default base URL on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('fcm_base_url');
+    $('baseUrl').value = saved || DEFAULT_BASE;
+    $('baseUrl').addEventListener('change', () => {
+      localStorage.setItem('fcm_base_url', $('baseUrl').value.trim());
+    });
+    const savedSecret = localStorage.getItem('fcm_cron_secret');
+    if (savedSecret) $('cron_secret').value = savedSecret;
+    $('cron_secret').addEventListener('change', () => {
+      localStorage.setItem('fcm_cron_secret', $('cron_secret').value.trim());
+    });
+  });
+
+  function base(){
+    return $('baseUrl').value.trim().replace(/\/$/,'') || DEFAULT_BASE;
+  }
 
   function resetTrace(){
     for(let i=1;i<=5;i++){ $('tr'+i).className='trace-step'; $('tr'+i+'v').textContent=''; }
@@ -323,12 +342,10 @@
   async function runSendToUser(){
     const uid=$('uid_input').value.trim();
     if(!uid){alert('Enter a UID first');return;}
-    if(!base()){alert('Set the Base URL first');return;}
     const btn=$('btnStu');
     btn.disabled=true;btn.classList.add('loading');
     resetTrace();
 
-    // Animate trace to show what's happening on the server
     trace(1,'active');
     await delay(300);
     trace(1,'done','reading…');trace(2,'active');
@@ -370,7 +387,6 @@
   }
 
   async function runCron(){
-    if(!base()){alert('Set the Base URL first');return;}
     const secret=$('cron_secret').value.trim();
     const btn=$('btnCron');
     btn.disabled=true;btn.classList.add('loading');
