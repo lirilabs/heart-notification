@@ -3,211 +3,231 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FCM Engine · Test Console</title>
+<title>FCM Engine · Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #07080d;
-    --surface: #0f1017;
-    --surface2: #13141d;
-    --border: #1c1d2b;
-    --border2: #252637;
-    --accent: #00e5ff;
-    --accent-dim: rgba(0,229,255,.12);
-    --green: #00ff88;
-    --red: #ff4560;
-    --yellow: #ffd166;
-    --purple: #bd93f9;
-    --orange: #ff9640;
-    --text: #dde1f0;
-    --muted: #555870;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'Outfit', sans-serif;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
-  body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px,
-      rgba(0,229,255,.012) 2px, rgba(0,229,255,.012) 4px);
-  }
-  .shell { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 44px 20px 100px; }
+:root {
+  --bg:      #08090f;
+  --surf:    #0e0f18;
+  --surf2:   #12131e;
+  --surf3:   #181927;
+  --border:  #1e2030;
+  --border2: #272940;
+  --accent:  #5b8dee;
+  --accent2: #7c6df5;
+  --glow:    rgba(91,141,238,.18);
+  --green:   #3ddc97;
+  --red:     #ff5470;
+  --yellow:  #f4c842;
+  --purple:  #c084fc;
+  --orange:  #fb923c;
+  --text:    #d6daf0;
+  --muted:   #4a4d6a;
+  --mono:    'IBM Plex Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--display);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:128px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;opacity:.35}
 
-  .topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 42px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
-  .icon { width: 42px; height: 42px; border-radius: 9px; flex-shrink: 0; background: var(--accent-dim); border: 1px solid rgba(0,229,255,.25); display: grid; place-items: center; font-size: 20px; box-shadow: 0 0 18px rgba(0,229,255,.18); }
-  .topbar h1 { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
-  .topbar h1 em { color: var(--accent); font-style: normal; }
-  .chip { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--muted); border: 1px solid var(--border2); padding: 4px 10px; border-radius: 20px; letter-spacing: .5px; }
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:48px 24px 120px}
 
-  .url-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 32px; }
-  .url-row span { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; }
-  .url-row input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: var(--mono); font-size: 12px; }
-  .url-row input::placeholder { color: var(--muted); }
+/* Header */
+.header{margin-bottom:52px}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(91,141,238,.2),rgba(124,109,245,.2));
+  border:1px solid rgba(91,141,238,.35);box-shadow:0 0 32px rgba(91,141,238,.2),inset 0 1px 0 rgba(255,255,255,.06)}
+.logo-text h1{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.logo-text h1 em{color:var(--accent);font-style:normal}
+.logo-text p{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.tag{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border2);padding:5px 12px;border-radius:20px;letter-spacing:.5px;align-self:flex-start;margin-top:4px}
 
-  .step-label { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
-  .step-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .step-label .num { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border2); display: grid; place-items: center; font-size: 10px; color: var(--accent); flex-shrink: 0; }
+.url-bar{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--border2);border-radius:12px;padding:11px 18px}
+.url-bar .pill{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--bg);background:var(--accent);padding:3px 8px;border-radius:4px;white-space:nowrap;font-weight:600}
+.url-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px}
+.url-bar input::placeholder{color:var(--muted)}
 
-  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 32px; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 14px 18px; }
-  .stat-l { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
-  .stat-n { font-size: 28px; font-weight: 800; margin-top: 5px; line-height: 1; }
-  .c { color: var(--accent); } .g { color: var(--green); } .r { color: var(--red); }
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:44px}
+.stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px 20px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(255,255,255,.02));pointer-events:none}
+.stat-l{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.stat-n{font-size:32px;font-weight:800;margin-top:6px;line-height:1;font-family:var(--mono)}
+.ca{color:var(--accent)} .cg{color:var(--green)} .cr{color:var(--red)}
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; transition: border-color .25s; }
-  .card:hover { border-color: var(--border2); }
-  .card-top { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .method-tag { font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 5px; background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.2); }
-  .method-tag.get { background: rgba(255,209,102,.1); color: var(--yellow); border-color: rgba(255,209,102,.2); }
-  .ep { font-family: var(--mono); font-size: 13px; }
-  .ep-desc { margin-left: auto; font-size: 12px; color: var(--muted); }
-  .card-body { padding: 22px; }
+/* Section label */
+.section-label{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.section-label .idx{font-family:var(--mono);font-size:9px;font-weight:600;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;background:var(--accent);color:var(--bg)}
+.section-label .title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
-  /* Info box */
-  .info-box { border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; line-height: 1.7; font-size: 13px; }
-  .info-box.blue { background: rgba(0,229,255,.06); border: 1px solid rgba(0,229,255,.2); }
-  .info-box.orange { background: rgba(255,150,64,.06); border: 1px solid rgba(255,150,64,.2); }
-  .info-box.red { background: rgba(255,69,96,.06); border: 1px solid rgba(255,69,96,.2); }
-  .info-box.green { background: rgba(0,255,136,.06); border: 1px solid rgba(0,255,136,.2); }
-  .info-box h4 { font-size: 11px; font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
-  .info-box.blue h4  { color: var(--accent); }
-  .info-box.orange h4 { color: var(--orange); }
-  .info-box.red h4   { color: var(--red); }
-  .info-box.green h4 { color: var(--green); }
-  .info-box code { font-family: var(--mono); font-size: 11px; background: rgba(255,255,255,.07); padding: 2px 6px; border-radius: 4px; }
-  .info-box ol, .info-box ul { margin-left: 18px; }
-  .info-box li { margin-bottom: 4px; }
-  .info-box a { color: var(--accent); text-decoration: none; }
-  .info-box a:hover { text-decoration: underline; }
+/* Card */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:16px;margin-bottom:24px;overflow:hidden;transition:border-color .3s}
+.card:hover{border-color:var(--border2)}
+.card-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.method{font-family:var(--mono);font-size:10px;font-weight:600;padding:4px 9px;border-radius:5px}
+.method.post{background:rgba(61,220,151,.1);color:var(--green);border:1px solid rgba(61,220,151,.25)}
+.method.get{background:rgba(244,200,66,.1);color:var(--yellow);border:1px solid rgba(244,200,66,.25)}
+.endpoint{font-family:var(--mono);font-size:13px;color:var(--text)}
+.desc{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.card-body{padding:24px}
 
-  .uid-wrap label { display: block; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 8px; }
-  .uid-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 13px 16px; color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s; }
-  .uid-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,.08); }
-  .uid-input::placeholder { color: var(--muted); }
+/* Fields */
+.field{margin-bottom:14px}
+.field label,.inp-label{display:block;font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.inp{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,141,238,.1)}
+.inp::placeholder{color:var(--muted)}
 
-  .flow-trace { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
-  .trace-step { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 8px 12px; border-radius: 7px; background: var(--surface2); border: 1px solid var(--border); transition: all .3s; }
-  .trace-step .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; transition: background .3s, box-shadow .3s; }
-  .trace-step.active .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-  .trace-step.done   .dot { background: var(--green);  box-shadow: 0 0 8px var(--green); }
-  .trace-step.fail   .dot { background: var(--red);    box-shadow: 0 0 8px var(--red); }
-  .trace-step.active { color: var(--accent); border-color: rgba(0,229,255,.2); background: rgba(0,229,255,.04); }
-  .trace-step.done   { color: var(--green);  border-color: rgba(0,255,136,.2); background: rgba(0,255,136,.04); }
-  .trace-step.fail   { color: var(--red);    border-color: rgba(255,69,96,.2);  background: rgba(255,69,96,.04); }
-  .trace-val { margin-left: auto; color: var(--purple); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+/* Flow trace */
+.trace{display:flex;flex-direction:column;gap:5px;margin:16px 0}
+.t{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 12px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);transition:all .25s}
+.t .dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .3s}
+.t.active{color:var(--accent);border-color:rgba(91,141,238,.3);background:rgba(91,141,238,.05)}
+.t.active .dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.t.done{color:var(--green);border-color:rgba(61,220,151,.25);background:rgba(61,220,151,.05)}
+.t.done .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+.t.fail{color:var(--red);border-color:rgba(255,84,112,.25);background:rgba(255,84,112,.05)}
+.t.fail .dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+.t-val{margin-left:auto;color:var(--purple);font-size:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-  .send-btn { margin-top: 18px; width: 100%; padding: 13px; border: none; border-radius: 10px; cursor: pointer; font-family: var(--sans); font-weight: 700; font-size: 14px; background: linear-gradient(135deg, #00c9e0, #0077ff); color: #fff; letter-spacing: .3px; display: flex; align-items: center; justify-content: center; gap: 9px; transition: opacity .2s, transform .15s; box-shadow: 0 4px 20px rgba(0,200,255,.2); }
-  .send-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
-  .send-btn:active:not(:disabled) { transform: scale(.99); }
-  .send-btn:disabled { opacity: .4; cursor: not-allowed; }
-  .send-btn .spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; display: none; animation: spin .7s linear infinite; }
-  .send-btn.loading .spin { display: block; }
-  .send-btn.loading .btn-label { display: none; }
+/* Buttons */
+.btn{width:100%;padding:14px;border:none;border-radius:11px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s,transform .15s;margin-top:18px}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:hover:not(:disabled){opacity:.88;transform:translateY(-1px)}
+.btn:active:not(:disabled){transform:scale(.99)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 24px rgba(91,141,238,.3)}
+.btn.ghost-red{background:rgba(255,84,112,.1);color:var(--red);border:1px solid rgba(255,84,112,.28);box-shadow:none}
+.btn.ghost-yellow{background:rgba(244,200,66,.09);color:var(--yellow);border:1px solid rgba(244,200,66,.25);box-shadow:none}
+.btn .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
+.btn.loading .spin{display:block}
+.btn.loading .lbl{display:none}
+.btn-row{display:flex;gap:10px;margin-top:18px}
+.btn-row .btn{margin-top:0;flex:1}
+.btn-row .btn.sm{flex:0 0 auto;width:auto;padding:14px 20px}
 
-  .cron-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); background: rgba(255,209,102,.06); border: 1px solid rgba(255,209,102,.15); padding: 9px 14px; border-radius: 8px; margin-bottom: 16px; line-height: 1.6; }
-  .cron-hint b { color: var(--yellow); font-weight: 500; }
+/* Scheduler */
+.sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.sched-cell{background:var(--surf2);border:1px solid var(--border2);border-radius:12px;padding:16px 18px}
+.sched-cell label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:10px}
+.time-inp{width:100%;background:transparent;border:none;outline:none;color:var(--accent);font-family:var(--mono);font-size:26px;font-weight:600}
+.time-inp::-webkit-calendar-picker-indicator{filter:invert(1) sepia(1) saturate(3) hue-rotate(185deg);opacity:.5;cursor:pointer}
+.tz-sel{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:13px;cursor:pointer}
+.tz-sel option{background:#12131e}
 
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 7px; }
-  .field input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; transition: border-color .2s; }
-  .field input:focus { border-color: var(--accent); }
-  .field input::placeholder { color: var(--muted); }
+.mode-row{display:flex;gap:8px;margin-bottom:14px}
+.mode-btn{flex:1;padding:9px;border:1px solid var(--border2);border-radius:9px;background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.mode-btn.on{border-color:rgba(91,141,238,.45);background:rgba(91,141,238,.1);color:var(--accent)}
 
-  /* ── Scheduler ── */
-  .scheduler-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .sched-card { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 14px 16px; }
-  .sched-card label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 10px; }
-  .time-input { width: 100%; background: transparent; border: none; outline: none; color: var(--accent); font-family: var(--mono); font-size: 22px; font-weight: 600; }
-  .time-input::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(160deg); opacity: .6; cursor: pointer; }
-  .tz-select { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: var(--mono); font-size: 13px; cursor: pointer; }
-  .tz-select option { background: #13141d; }
-  .sched-status { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; border-radius: 8px; font-family: var(--mono); font-size: 11px; background: var(--surface2); border: 1px solid var(--border); }
-  .sched-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .sched-dot.armed { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s ease-in-out infinite; }
-  .sched-dot.countdown { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); animation: pulse 1s ease-in-out infinite; }
-  .sched-label { color: var(--muted); }
-  .sched-label.armed { color: var(--green); }
-  .sched-label.countdown { color: var(--yellow); }
-  .sched-countdown { margin-left: auto; color: var(--purple); }
-  .uid-for-sched { margin-bottom: 12px; }
-  .uid-for-sched label { display: block; font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 7px; }
-  .uid-for-sched input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; transition: border-color .2s; }
-  .uid-for-sched input:focus { border-color: var(--accent); }
-  .uid-for-sched input::placeholder { color: var(--muted); }
-  .sched-mode-row { display: flex; gap: 8px; margin-bottom: 14px; }
-  .mode-btn { flex: 1; padding: 8px; border: 1px solid var(--border2); border-radius: 8px; background: transparent; color: var(--muted); font-family: var(--mono); font-size: 11px; cursor: pointer; transition: all .2s; }
-  .mode-btn.active { border-color: rgba(0,229,255,.4); background: var(--accent-dim); color: var(--accent); }
+/* Arm status */
+.arm-bar{display:flex;align-items:center;gap:11px;padding:12px 16px;border-radius:10px;background:var(--surf2);border:1px solid var(--border);margin-bottom:0;font-family:var(--mono);font-size:11px;min-height:44px}
+.arm-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:all .3s}
+.arm-dot.armed {background:var(--green); box-shadow:0 0 10px var(--green); animation:pulse 2s ease-in-out infinite}
+.arm-dot.soon  {background:var(--yellow);box-shadow:0 0 10px var(--yellow);animation:pulse .8s ease-in-out infinite}
+.arm-dot.firing{background:var(--orange);box-shadow:0 0 12px var(--orange)}
+.arm-lbl{color:var(--muted);transition:color .3s}
+.arm-lbl.armed {color:var(--green)}
+.arm-lbl.soon  {color:var(--yellow)}
+.arm-lbl.firing{color:var(--orange)}
+.arm-cd{margin-left:auto;color:var(--purple);font-size:14px;font-weight:600;letter-spacing:1.5px;font-family:var(--mono)}
 
-  .res-pane { display: none; margin-top: 18px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
-  .res-pane.show { display: block; }
-  .res-bar { display: flex; align-items: center; gap: 9px; padding: 8px 14px; background: rgba(255,255,255,.025); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; }
-  .rdot { width: 7px; height: 7px; border-radius: 50%; }
-  .rdot.ok  { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .rdot.err { background: var(--red);   box-shadow: 0 0 6px var(--red); }
-  .rcode { font-weight: 700; }
-  .rcode.ok { color: var(--green); }
-  .rcode.err { color: var(--red); }
-  .rms { margin-left: auto; color: var(--muted); }
-  pre.rbody { padding: 16px; font-family: var(--mono); font-size: 11px; line-height: 1.8; color: #7f8ab0; background: #090a10; overflow-x: auto; max-height: 300px; white-space: pre-wrap; word-break: break-all; }
+/* Callout */
+.callout{border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:12px;line-height:1.7}
+.callout.info{background:rgba(91,141,238,.07);border:1px solid rgba(91,141,238,.2)}
+.callout.warn{background:rgba(244,200,66,.06);border:1px solid rgba(244,200,66,.18)}
+.callout h5{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.callout.info h5{color:var(--accent)}
+.callout.warn h5{color:var(--yellow)}
+.callout code{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
 
-  .badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-left: 6px; }
-  .badge.fixed { background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.2); }
-  .badge.warn  { background: rgba(255,150,64,.1); color: var(--orange); border: 1px solid rgba(255,150,64,.2); }
+/* Thin divider */
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:20px 0}
 
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
-  @media(max-width:520px){ .stats { grid-template-columns: 1fr; } .ep-desc { display: none; } .scheduler-grid { grid-template-columns: 1fr; } }
+/* Response pane */
+.res{display:none;margin-top:16px;border-radius:11px;overflow:hidden;border:1px solid var(--border)}
+.res.show{display:block}
+.res-bar{display:flex;align-items:center;gap:9px;padding:9px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.rdot{width:7px;height:7px;border-radius:50%}
+.rdot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.rdot.err{background:var(--red);box-shadow:0 0 6px var(--red)}
+.rcode.ok{color:var(--green);font-weight:700}
+.rcode.err{color:var(--red);font-weight:700}
+.rms{margin-left:auto;color:var(--muted)}
+pre.rbody{padding:16px;font-family:var(--mono);font-size:11px;line-height:1.9;color:#6a7090;background:#070810;overflow-x:auto;max-height:280px;white-space:pre-wrap;word-break:break-all}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:540px){.stats{grid-template-columns:1fr}.sched-grid{grid-template-columns:1fr}.desc{display:none}}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="wrap">
 
-  <div class="topbar">
-    <div class="icon">🔔</div>
-    <h1>FCM Engine <em>Console</em></h1>
-    <div class="chip">promora-9ab6e</div>
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">🔔</div>
+        <div class="logo-text">
+          <h1>FCM <em>Engine</em></h1>
+          <p>Notification Console</p>
+        </div>
+      </div>
+      <div class="tag">promora-9ab6e</div>
+    </div>
+    <div class="url-bar">
+      <div class="pill">BASE URL</div>
+      <input type="text" id="baseUrl" placeholder="https://your-app.vercel.app"/>
+    </div>
   </div>
 
-  <div class="url-row">
-    <span>BASE&nbsp;URL</span>
-    <input type="text" id="baseUrl" value="https://heart-notification.vercel.app"/>
-  </div>
-
+  <!-- ── Stats ── -->
   <div class="stats">
-    <div class="stat"><div class="stat-l">Total Calls</div><div class="stat-n c" id="sT">0</div></div>
-    <div class="stat"><div class="stat-l">Succeeded</div><div class="stat-n g" id="sO">0</div></div>
-    <div class="stat"><div class="stat-l">Failed</div><div class="stat-n r" id="sF">0</div></div>
+    <div class="stat"><div class="stat-l">Total Calls</div><div class="stat-n ca" id="sT">0</div></div>
+    <div class="stat"><div class="stat-l">Succeeded</div><div class="stat-n cg" id="sO">0</div></div>
+    <div class="stat"><div class="stat-l">Failed</div><div class="stat-n cr" id="sF">0</div></div>
   </div>
 
-  <!-- ── 1. UID → Auto Everything ── -->
-  <div class="step-label"><span class="num">1</span>Auto Send by UID</div>
+  <!-- ══════════════════════════════════════════════
+       SECTION 1 — Individual · instant send
+  ══════════════════════════════════════════════ -->
+  <div class="section-label"><span class="idx">1</span><span class="title">Individual — Instant Send</span></div>
   <div class="card">
-    <div class="card-top">
-      <span class="method-tag">POST</span>
-      <span class="ep">/api/send-to-user</span>
-      <span class="ep-desc">token · category · prompt — all fetched server-side</span>
+    <div class="card-head">
+      <span class="method post">POST</span>
+      <span class="endpoint">/api/send-to-user</span>
+      <span class="desc">single UID → fires immediately</span>
     </div>
     <div class="card-body">
-      <div class="uid-wrap">
-        <label>USER UID *</label>
-        <input class="uid-input" type="text" id="uid_input" placeholder="Paste Firestore user UID here…"/>
+
+      <div class="field">
+        <label>User UID *</label>
+        <input class="inp" type="text" id="uid_input" placeholder="Paste Firestore user UID here…"/>
       </div>
 
-      <div class="flow-trace">
-        <div class="trace-step" id="tr1"><div class="dot"></div><span>users/{uid} → fcmToken</span><span class="trace-val" id="tr1v"></span></div>
-        <div class="trace-step" id="tr2"><div class="dot"></div><span>users/{uid}/personalizedCategory → topic</span><span class="trace-val" id="tr2v"></span></div>
-        <div class="trace-step" id="tr3"><div class="dot"></div><span>prompts/{topic} → title + message</span><span class="trace-val" id="tr3v"></span></div>
-        <div class="trace-step" id="tr4"><div class="dot"></div><span>FCM → push notification sent</span><span class="trace-val" id="tr4v"></span></div>
-        <div class="trace-step" id="tr5"><div class="dot"></div><span>users/{uid}/notificationLog → audit written</span><span class="trace-val" id="tr5v"></span></div>
+      <div class="trace">
+        <div class="t" id="tr1"><div class="dot"></div><span>users/{uid} → fcmToken</span><span class="t-val" id="tr1v"></span></div>
+        <div class="t" id="tr2"><div class="dot"></div><span>personalizedCategory → topic</span><span class="t-val" id="tr2v"></span></div>
+        <div class="t" id="tr3"><div class="dot"></div><span>prompts/{topic} → title + body</span><span class="t-val" id="tr3v"></span></div>
+        <div class="t" id="tr4"><div class="dot"></div><span>FCM → push notification dispatched</span><span class="t-val" id="tr4v"></span></div>
+        <div class="t" id="tr5"><div class="dot"></div><span>notificationLog → audit written</span><span class="t-val" id="tr5v"></span></div>
       </div>
 
-      <button class="send-btn" id="btnStu" onclick="runSendToUser()">
+      <button class="btn primary" id="btnStu" onclick="runSendToUser()">
         <div class="spin"></div>
-        <span class="btn-label">⚡ Send Notification</span>
+        <span class="lbl">⚡&nbsp; Send Now</span>
       </button>
 
-      <div class="res-pane" id="res_stu">
+      <div class="res" id="res_stu">
         <div class="res-bar">
           <div class="rdot" id="rdot_stu"></div>
           <span class="rcode" id="rcode_stu"></span>
@@ -219,133 +239,84 @@
     </div>
   </div>
 
-  <!-- ── 2. Scheduled Notification ── -->
-  <div class="step-label"><span class="num">2</span>Schedule a Notification</div>
+  <!-- ══════════════════════════════════════════════
+       SECTION 2 — All Users · scheduled batch
+  ══════════════════════════════════════════════ -->
+  <div class="section-label"><span class="idx">2</span><span class="title">All Users — Scheduled Batch</span></div>
   <div class="card">
-    <div class="card-top">
-      <span class="method-tag">POST</span>
-      <span class="ep">/api/send-to-user</span>
-      <span class="ep-desc">fires automatically at chosen time</span>
+    <div class="card-head">
+      <span class="method get">GET</span>
+      <span class="endpoint">/api/cron/morning-push</span>
+      <span class="desc">all users · fires at scheduled time</span>
     </div>
     <div class="card-body">
 
-      <div class="info-box blue" style="margin-bottom:16px">
-        <h4>⏰ How This Works</h4>
-        This schedules a <strong>browser-side timer</strong>. The page must stay open until the time fires.
-        For a <em>server-side</em> schedule, use the Vercel cron below with a custom cron expression.
+      <div class="callout warn">
+        <h5>⏰ Browser-side timer</h5>
+        Keep this tab open until the timer fires. For a permanent server-side daily schedule,
+        set <code>30 6 * * *</code> (= 12:00 PM IST) in your <code>vercel.json</code> crons config.
       </div>
 
-      <div class="uid-for-sched">
-        <label>TARGET UID *</label>
-        <input type="text" id="sched_uid" placeholder="Firestore user UID to notify…"/>
+      <!-- CRON_SECRET -->
+      <div class="field">
+        <label>CRON_SECRET &nbsp;<span style="color:var(--muted);font-size:9px;font-family:var(--mono)">— from Vercel env vars · leave blank if not set</span></label>
+        <input class="inp" type="password" id="cron_secret" placeholder="Your CRON_SECRET value…"/>
       </div>
 
-      <div class="sched-mode-row">
-        <button class="mode-btn active" id="modeOnce" onclick="setMode('once')">🔂 One-time</button>
-        <button class="mode-btn" id="modeDaily" onclick="setMode('daily')">🔁 Daily repeat</button>
+      <div class="hr"></div>
+      <div class="inp-label" style="margin-bottom:12px">Schedule</div>
+
+      <!-- Mode toggle -->
+      <div class="mode-row">
+        <button class="mode-btn on" id="modeOnce"  onclick="setMode('once')">🔂&nbsp; One-time</button>
+        <button class="mode-btn"    id="modeDaily" onclick="setMode('daily')">🔁&nbsp; Daily repeat</button>
       </div>
 
-      <div class="scheduler-grid">
-        <div class="sched-card">
-          <label>Fire Time</label>
-          <input class="time-input" type="time" id="sched_time" value="12:00"/>
+      <!-- Time + TZ -->
+      <div class="sched-grid">
+        <div class="sched-cell">
+          <label>Fire at</label>
+          <input class="time-inp" type="time" id="sched_time" value="06:30"/>
         </div>
-        <div class="sched-card">
+        <div class="sched-cell">
           <label>Timezone</label>
-          <select class="tz-select" id="sched_tz">
-            <option value="Asia/Kolkata">🇮🇳 IST (India)</option>
-            <option value="America/New_York">🇺🇸 EST (New York)</option>
-            <option value="America/Los_Angeles">🇺🇸 PST (LA)</option>
-            <option value="Europe/London">🇬🇧 GMT (London)</option>
-            <option value="Europe/Paris">🇪🇺 CET (Paris)</option>
-            <option value="Asia/Singapore">🇸🇬 SGT (Singapore)</option>
-            <option value="Asia/Dubai">🇦🇪 GST (Dubai)</option>
+          <select class="tz-sel" id="sched_tz">
+            <option value="Asia/Kolkata" selected>🇮🇳 IST — India</option>
             <option value="UTC">🌐 UTC</option>
+            <option value="America/New_York">🇺🇸 EST — New York</option>
+            <option value="America/Los_Angeles">🇺🇸 PST — Los Angeles</option>
+            <option value="Europe/London">🇬🇧 GMT — London</option>
+            <option value="Europe/Paris">🇪🇺 CET — Paris</option>
+            <option value="Asia/Singapore">🇸🇬 SGT — Singapore</option>
+            <option value="Asia/Dubai">🇦🇪 GST — Dubai</option>
+            <option value="Asia/Tokyo">🇯🇵 JST — Tokyo</option>
           </select>
         </div>
       </div>
 
-      <div class="sched-status" id="schedStatus">
-        <div class="sched-dot" id="schedDot"></div>
-        <span class="sched-label" id="schedLabel">No schedule set</span>
-        <span class="sched-countdown" id="schedCountdown"></span>
+      <!-- Countdown / status bar -->
+      <div class="arm-bar">
+        <div class="arm-dot" id="armDot"></div>
+        <span class="arm-lbl" id="armLbl">Not armed — pick a time then click Arm</span>
+        <span class="arm-cd"  id="armCd"></span>
       </div>
 
-      <div style="display:flex;gap:10px">
-        <button class="send-btn" id="btnArm" onclick="armSchedule()" style="flex:1">
+      <!-- Action buttons -->
+      <div class="btn-row">
+        <button class="btn primary" id="btnArm" onclick="armBatch()">
           <div class="spin"></div>
-          <span class="btn-label">🕐 Arm Schedule</span>
+          <span class="lbl">🕐&nbsp; Arm Schedule</span>
         </button>
-        <button class="send-btn" onclick="disarmSchedule()" style="flex:0 0 auto;width:auto;padding:13px 20px;background:rgba(255,69,96,.15);color:var(--red);border:1px solid rgba(255,69,96,.3);box-shadow:none" id="btnDisarm" disabled>
-          <span class="btn-label">✕ Disarm</span>
+        <button class="btn ghost-red sm" id="btnDisarm" onclick="disarmBatch()" disabled>
+          <span class="lbl">✕ Disarm</span>
+        </button>
+        <button class="btn ghost-yellow sm" id="btnNow" onclick="runBatchNow()">
+          <div class="spin"></div>
+          <span class="lbl">▶ Run Now</span>
         </button>
       </div>
 
-      <div class="res-pane" id="res_sched">
-        <div class="res-bar">
-          <div class="rdot" id="rdot_sched"></div>
-          <span class="rcode" id="rcode_sched"></span>
-          <span id="rlabel_sched"></span>
-          <span class="rms" id="rms_sched"></span>
-        </div>
-        <pre class="rbody" id="rbody_sched"></pre>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 3. Morning Batch + CRON_SECRET explainer ── -->
-  <div class="step-label"><span class="num">3</span>Trigger Morning Batch</div>
-  <div class="card">
-    <div class="card-top">
-      <span class="method-tag get">GET</span>
-      <span class="ep">/api/cron/morning-push</span>
-      <span class="ep-desc">Sends to all users — runs auto at 12 PM IST</span>
-    </div>
-    <div class="card-body">
-
-      <!-- CRON_SECRET explainer -->
-      <div class="info-box orange">
-        <h4>🔑 What is CRON_SECRET?</h4>
-        <strong>CRON_SECRET</strong> is a secret password you create yourself to protect your cron endpoint
-        so only authorised callers (Vercel's scheduler or this console) can trigger it.
-        Without it, anyone who knows your URL can blast notifications to all users.
-        <br/><br/>
-        <strong>How to set it up in 3 steps:</strong>
-        <ol style="margin-top:8px">
-          <li>
-            <strong>Generate a secret</strong> — run in your terminal:<br/>
-            <code>openssl rand -base64 32</code><br/>
-            You'll get something like: <code>Xk3pQ9mN2vR7yTwL...</code>
-          </li>
-          <li>
-            <strong>Add it to Vercel</strong> →
-            <a href="https://vercel.com/dashboard" target="_blank">vercel.com/dashboard</a>
-            → Your Project → <em>Settings → Environment Variables</em> →
-            Add <code>CRON_SECRET</code> = (your generated value) → Save → <strong>Redeploy</strong>.
-          </li>
-          <li>
-            <strong>Paste the same value below</strong> in the CRON_SECRET field.
-            This console will send it as <code>Authorization: Bearer &lt;secret&gt;</code>.
-          </li>
-        </ol>
-        <br/>
-        <strong>If you have NOT set CRON_SECRET</strong> in Vercel, leave the field below blank —
-        your backend skips the check entirely.
-      </div>
-
-      <div class="cron-hint" style="margin-top:0">
-        Vercel fires this automatically at <b>06:30 UTC → 12:00 PM IST</b> every day.<br/>
-        Schedule: <b>30 6 * * *</b> — Hit the button below to trigger it manually for testing.
-      </div>
-      <div class="field">
-        <label>CRON_SECRET (paste your env var value here)</label>
-        <input type="password" id="cron_secret" placeholder="Leave blank if you haven't set CRON_SECRET in Vercel"/>
-      </div>
-      <button class="send-btn" id="btnCron" onclick="runCron()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 4px 20px rgba(124,58,237,.25)">
-        <div class="spin"></div>
-        <span class="btn-label">▶ Run Morning Batch</span>
-      </button>
-      <div class="res-pane" id="res_cron">
+      <div class="res" id="res_cron">
         <div class="res-bar">
           <div class="rdot" id="rdot_cron"></div>
           <span class="rcode" id="rcode_cron"></span>
@@ -354,297 +325,188 @@
         </div>
         <pre class="rbody" id="rbody_cron"></pre>
       </div>
+
     </div>
   </div>
 
-  <!-- ── 4. "Android message too big" fix info ── -->
-  <div class="step-label"><span class="num">4</span>Android Payload Fix</div>
-  <div class="card">
-    <div class="card-top">
-      <span class="method-tag" style="background:rgba(255,69,96,.1);color:var(--red);border-color:rgba(255,69,96,.2)">BUG</span>
-      <span class="ep">Android message is too big</span>
-      <span class="badge fixed">✓ Fixed in v2</span>
-    </div>
-    <div class="card-body">
-      <div class="info-box red">
-        <h4>❌ Root Cause</h4>
-        FCM has a <strong>4 KB hard limit</strong> on the entire push payload including the <code>data</code> object.
-        Your images are stored as <strong>base64 strings in Firestore</strong> — a single WebP/PNG can be
-        100 KB+. When the backend did <code>imageBase64: base64Image</code> inside the FCM <code>data</code> field,
-        the payload exploded past the limit and FCM rejected it with <em>"Android message is too big"</em>.
-      </div>
-      <div class="info-box green">
-        <h4>✅ What the Fix Does (update your backend files)</h4>
-        The fix is <strong>one line removed</strong> from your <code>getPrompt()</code> function in both
-        <code>send-to-user.js</code> and <code>morning-push.js</code>:
-        <br/><br/>
-        <strong>Remove this from the <code>extra</code> object:</strong><br/>
-        <code>...(base64Image ? { imageBase64: base64Image } : {})</code>
-        <br/><br/>
-        Base64 images must <strong>never</strong> go into FCM's <code>data</code> payload.
-        Instead, your app should fetch the image from Firestore after the user taps the notification,
-        using the <code>promptId</code> that is already sent as a data field.
-        <br/><br/>
-        <strong>Updated flow:</strong>
-        <ol>
-          <li>FCM sends lightweight notification: <code>title</code>, <code>body</code>, <code>promptId</code>, <code>category</code>, <code>authorName</code></li>
-          <li>User taps notification → app opens</li>
-          <li>App uses <code>promptId</code> to fetch full prompt doc from Firestore (including images)</li>
-          <li>Images display inside the app — no FCM size limit applies</li>
-        </ol>
-      </div>
-
-      <div style="margin-top:4px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.8;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:16px">
-        <div style="color:var(--muted);margin-bottom:8px">// BEFORE — causes "too big" error</div>
-        <div style="color:var(--red)">const extra = {</div>
-        <div style="color:var(--red);padding-left:16px">promptId, promptText, category, authorName, authorPhoto,</div>
-        <div style="color:var(--red);padding-left:16px">...(base64Image ? { <strong>imageBase64: base64Image</strong> } : {}),  ← REMOVE THIS</div>
-        <div style="color:var(--red)">};</div>
-        <br/>
-        <div style="color:var(--muted);margin-bottom:8px">// AFTER — stays under 4 KB ✓</div>
-        <div style="color:var(--green)">const extra = {</div>
-        <div style="color:var(--green);padding-left:16px">promptId, promptText, category, authorName, authorPhoto,</div>
-        <div style="color:var(--green)">};</div>
-      </div>
-    </div>
-  </div>
-
-</div>
+</div><!-- /wrap -->
 
 <script>
-  const DEFAULT_BASE = 'https://heart-notification.vercel.app';
-  let sT=0, sO=0, sF=0;
-  const $ = id => document.getElementById(id);
+const DEFAULT_BASE = 'https://heart-notification.vercel.app';
+let sT=0,sO=0,sF=0;
+const $ = id => document.getElementById(id);
 
-  let schedTimer = null;
-  let schedInterval = null;
-  let schedMode = 'once';
-  let schedFired = false;
+/* ── Persist ── */
+window.addEventListener('DOMContentLoaded', () => {
+  $('baseUrl').value     = localStorage.getItem('fcm_base')   || DEFAULT_BASE;
+  $('cron_secret').value = localStorage.getItem('fcm_secret') || '';
+  $('sched_time').value  = localStorage.getItem('fcm_time')   || '06:30';
+  $('sched_tz').value    = localStorage.getItem('fcm_tz')     || 'Asia/Kolkata';
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('fcm_base_url');
-    $('baseUrl').value = saved || DEFAULT_BASE;
-    $('baseUrl').addEventListener('change', () => localStorage.setItem('fcm_base_url', $('baseUrl').value.trim()));
-    const savedSecret = localStorage.getItem('fcm_cron_secret');
-    if (savedSecret) $('cron_secret').value = savedSecret;
-    $('cron_secret').addEventListener('change', () => localStorage.setItem('fcm_cron_secret', $('cron_secret').value.trim()));
-    const savedSchedUid = localStorage.getItem('fcm_sched_uid');
-    if (savedSchedUid) $('sched_uid').value = savedSchedUid;
-    $('sched_uid').addEventListener('change', () => localStorage.setItem('fcm_sched_uid', $('sched_uid').value.trim()));
-  });
+  $('baseUrl').addEventListener('change',    () => localStorage.setItem('fcm_base',   $('baseUrl').value.trim()));
+  $('cron_secret').addEventListener('change',() => localStorage.setItem('fcm_secret', $('cron_secret').value.trim()));
+  $('sched_time').addEventListener('change', () => localStorage.setItem('fcm_time',   $('sched_time').value));
+  $('sched_tz').addEventListener('change',   () => localStorage.setItem('fcm_tz',     $('sched_tz').value));
+});
 
-  function base() { return $('baseUrl').value.trim().replace(/\/$/, '') || DEFAULT_BASE; }
+function base(){ return $('baseUrl').value.trim().replace(/\/$/,'') || DEFAULT_BASE; }
 
-  function setMode(m) {
-    schedMode = m;
-    $('modeOnce').classList.toggle('active', m === 'once');
-    $('modeDaily').classList.toggle('active', m === 'daily');
-  }
+/* ── Stats ── */
+function bump(ok){ sT++; if(ok)sO++; else sF++; $('sT').textContent=sT; $('sO').textContent=sO; $('sF').textContent=sF; }
 
-  /* ── Scheduler logic ── */
-  function getNextFireMs() {
-    const [hh, mm] = $('sched_time').value.split(':').map(Number);
-    const tz = $('sched_tz').value;
+/* ── Response pane ── */
+function showRes(id, status, data, ms){
+  const ok = status>=200 && status<300;
+  $('res_'+id).classList.add('show');
+  $('rdot_'+id).className    = 'rdot '+(ok?'ok':'err');
+  $('rcode_'+id).className   = 'rcode '+(ok?'ok':'err');
+  $('rcode_'+id).textContent  = status || 'ERR';
+  $('rlabel_'+id).textContent = ok ? '✓ Success' : '✗ Failed';
+  $('rms_'+id).textContent    = ms+'ms';
+  $('rbody_'+id).textContent  = JSON.stringify(data,null,2);
+  bump(ok);
+}
 
-    // Get current time in target tz
-    const now = new Date();
-    const tzNow = new Date(now.toLocaleString('en-US', { timeZone: tz }));
-    const target = new Date(tzNow);
-    target.setHours(hh, mm, 0, 0);
+/* ── Trace ── */
+function resetTrace(){ for(let i=1;i<=5;i++){ $('tr'+i).className='t'; $('tr'+i+'v').textContent=''; } }
+function trace(i,s,v=''){ $('tr'+i).className='t '+s; if(v) $('tr'+i+'v').textContent=v; }
+const delay = ms => new Promise(r=>setTimeout(r,ms));
 
-    if (target <= tzNow) {
-      if (schedMode === 'daily') {
-        target.setDate(target.getDate() + 1);
-      } else {
-        return null; // time already passed today for one-time
-      }
+/* ════════════════════════════════
+   1 — Individual instant send
+════════════════════════════════ */
+async function runSendToUser(){
+  const uid = $('uid_input').value.trim();
+  if(!uid){ alert('Enter a UID first'); return; }
+  const btn = $('btnStu');
+  btn.disabled=true; btn.classList.add('loading');
+  resetTrace();
+
+  trace(1,'active'); await delay(260);
+  trace(1,'done','reading…'); trace(2,'active'); await delay(260);
+  trace(2,'done','reading…'); trace(3,'active'); await delay(260);
+  trace(3,'done','reading…'); trace(4,'active');
+
+  const t0=Date.now();
+  try{
+    const res  = await fetch(base()+'/api/send-to-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid})});
+    const data = await res.json().catch(()=>({}));
+    const ms   = Date.now()-t0;
+    const ok   = res.status>=200&&res.status<300;
+    const r    = data?.result??{};
+    if(ok){
+      trace(1,'done','✓ token'); trace(2,'done',r.topic?'✓ '+r.topic:'✓ found');
+      trace(3,'done','✓ loaded'); trace(4,'done','✓ '+(r.success?.length??1)+' sent'); trace(5,'done','✓ logged');
+    } else {
+      trace(1,'done'); trace(2,'done'); trace(3,'done');
+      trace(4,'fail','✗ '+(r.reason??data?.error??'see response')); trace(5,'fail');
     }
-
-    const diffMs = target - tzNow;
-    return diffMs;
+    showRes('stu', res.status, data, ms);
+  } catch(e){
+    trace(4,'fail'); trace(5,'fail');
+    showRes('stu', 0, {error:e.message}, Date.now()-t0);
+  } finally {
+    btn.disabled=false; btn.classList.remove('loading');
   }
+}
 
-  function formatCountdown(ms) {
-    if (ms <= 0) return '00:00:00';
-    const totalSec = Math.floor(ms / 1000);
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return [h, m, s].map(n => String(n).padStart(2, '0')).join(':');
+/* ════════════════════════════════
+   2 — Batch scheduler
+════════════════════════════════ */
+let schedMode='once', schedTimer=null, schedTick=null;
+
+function setMode(m){
+  schedMode=m;
+  $('modeOnce').classList.toggle('on', m==='once');
+  $('modeDaily').classList.toggle('on', m==='daily');
+}
+
+function getMsUntilFire(){
+  const [hh,mm] = $('sched_time').value.split(':').map(Number);
+  const tz = $('sched_tz').value;
+  const now = new Date();
+  const tzNow = new Date(now.toLocaleString('en-US',{timeZone:tz}));
+  const target = new Date(tzNow);
+  target.setHours(hh,mm,0,0);
+  let diff = target - tzNow;
+  if(diff <= 0){
+    if(schedMode==='daily') diff += 86400000;
+    else return null;
   }
+  return diff;
+}
 
-  function setSchedUI(state, label, countdown = '') {
-    const dot = $('schedDot');
-    const lbl = $('schedLabel');
-    dot.className = 'sched-dot ' + state;
-    lbl.className = 'sched-label ' + state;
-    lbl.textContent = label;
-    $('schedCountdown').textContent = countdown;
+function fmt(ms){
+  if(ms<=0) return '00:00:00';
+  const s=Math.floor(ms/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return [h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
+}
+
+function setArmUI(state, text, cd=''){
+  $('armDot').className = 'arm-dot'+(state?' '+state:'');
+  $('armLbl').className = 'arm-lbl'+(state?' '+state:'');
+  $('armLbl').textContent = text;
+  $('armCd').textContent  = cd;
+}
+
+function clearTimers(){ clearTimeout(schedTimer); clearInterval(schedTick); schedTimer=schedTick=null; }
+
+function armBatch(){
+  const delayMs = getMsUntilFire();
+  if(delayMs===null){ setArmUI('','⚠ Time already passed — pick a future time or switch to Daily'); return; }
+
+  clearTimers();
+  $('btnArm').disabled=true; $('btnDisarm').disabled=false;
+
+  const fireAt = Date.now()+delayMs;
+  const [hh,mm] = $('sched_time').value.split(':').map(Number);
+  const timeLabel = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${$('sched_tz').value}`;
+
+  function tick(){
+    const rem = fireAt-Date.now();
+    if(rem<=0){ clearInterval(schedTick); return; }
+    if(rem<10000) setArmUI('soon',  '🚀 Firing soon…', fmt(rem));
+    else          setArmUI('armed', `Armed · fires at ${timeLabel}`, fmt(rem));
   }
+  tick();
+  schedTick = setInterval(tick,1000);
 
-  function armSchedule() {
-    const uid = $('sched_uid').value.trim();
-    if (!uid) { alert('Enter a UID to schedule for'); return; }
-
-    const [hh, mm] = $('sched_time').value.split(':').map(Number);
-    const tz = $('sched_tz').value;
-
-    disarmSchedule();
-    schedFired = false;
-
-    function scheduleNext() {
-      const delayMs = getNextFireMs();
-      if (delayMs === null) {
-        setSchedUI('', '⚠ Time already passed — choose a future time or switch to Daily', '');
-        return;
-      }
-
-      setSchedUI('armed', `Armed · fires at ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${tz}`, formatCountdown(delayMs));
-
-      // Countdown ticker
-      const fireAt = Date.now() + delayMs;
-      schedInterval = setInterval(() => {
-        const remaining = fireAt - Date.now();
-        if (remaining < 10000) {
-          setSchedUI('countdown', '🚀 Firing soon…', formatCountdown(Math.max(0, remaining)));
-        } else {
-          setSchedUI('armed', `Armed · fires at ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${tz}`, formatCountdown(remaining));
-        }
-      }, 1000);
-
-      schedTimer = setTimeout(async () => {
-        clearInterval(schedInterval);
-        schedInterval = null;
-        setSchedUI('countdown', '🔥 Firing!', '');
-        await runScheduledSend(uid);
-        if (schedMode === 'daily') {
-          scheduleNext(); // re-arm for tomorrow
-        } else {
-          setSchedUI('done', '✓ Fired (one-time complete)', '');
-          $('btnDisarm').disabled = true;
-          $('btnArm').disabled = false;
-        }
-      }, delayMs);
+  schedTimer = setTimeout(async ()=>{
+    clearInterval(schedTick); schedTick=null;
+    setArmUI('firing','🔥 Firing batch now…','');
+    await executeBatch();
+    if(schedMode==='daily'){
+      armBatch(); // re-arm for tomorrow
+    } else {
+      setArmUI('','✓ One-time fire complete — batch sent to all users');
+      $('btnArm').disabled=false; $('btnDisarm').disabled=true;
     }
+  }, delayMs);
+}
 
-    scheduleNext();
-    $('btnDisarm').disabled = false;
-    $('btnArm').disabled = true;
+function disarmBatch(){
+  clearTimers();
+  setArmUI('','Disarmed');
+  $('btnArm').disabled=false; $('btnDisarm').disabled=true;
+}
+
+async function executeBatch(){
+  const btn = $('btnNow');
+  btn.disabled=true; btn.classList.add('loading');
+  const secret = $('cron_secret').value.trim();
+  const t0=Date.now();
+  try{
+    const res  = await fetch(base()+'/api/cron/morning-push',{method:'GET',headers:secret?{Authorization:'Bearer '+secret}:{}});
+    const data = await res.json().catch(()=>({}));
+    showRes('cron', res.status, data, Date.now()-t0);
+  } catch(e){
+    showRes('cron', 0, {error:e.message}, Date.now()-t0);
+  } finally {
+    btn.disabled=false; btn.classList.remove('loading');
   }
+}
 
-  function disarmSchedule() {
-    if (schedTimer) { clearTimeout(schedTimer); schedTimer = null; }
-    if (schedInterval) { clearInterval(schedInterval); schedInterval = null; }
-    setSchedUI('', 'No schedule set', '');
-    $('btnDisarm').disabled = true;
-    $('btnArm').disabled = false;
-  }
-
-  async function runScheduledSend(uid) {
-    const t0 = Date.now();
-    try {
-      const res = await fetch(base() + '/api/send-to-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid })
-      });
-      const data = await res.json().catch(() => ({}));
-      showRes('sched', res.status, data, Date.now() - t0);
-    } catch (e) {
-      showRes('sched', 0, { error: e.message }, Date.now() - t0);
-    }
-  }
-
-  /* ── Trace helpers ── */
-  function resetTrace() {
-    for (let i = 1; i <= 5; i++) { $('tr' + i).className = 'trace-step'; $('tr' + i + 'v').textContent = ''; }
-  }
-  function trace(i, state, val = '') {
-    $('tr' + i).className = 'trace-step ' + state;
-    if (val) $('tr' + i + 'v').textContent = val;
-  }
-
-  /* ── Response display ── */
-  function showRes(id, status, data, ms) {
-    const ok = status >= 200 && status < 300;
-    $('res_' + id).classList.add('show');
-    $('rdot_' + id).className = 'rdot ' + (ok ? 'ok' : 'err');
-    $('rcode_' + id).className = 'rcode ' + (ok ? 'ok' : 'err');
-    $('rcode_' + id).textContent = status || 'ERR';
-    $('rlabel_' + id).textContent = ok ? '✓ Success' : '✗ Failed';
-    $('rms_' + id).textContent = ms + 'ms';
-    $('rbody_' + id).textContent = JSON.stringify(data, null, 2);
-    sT++; if (ok) sO++; else sF++;
-    $('sT').textContent = sT; $('sO').textContent = sO; $('sF').textContent = sF;
-  }
-
-  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-  async function runSendToUser() {
-    const uid = $('uid_input').value.trim();
-    if (!uid) { alert('Enter a UID first'); return; }
-    const btn = $('btnStu');
-    btn.disabled = true; btn.classList.add('loading');
-    resetTrace();
-
-    trace(1, 'active');
-    await delay(300);
-    trace(1, 'done', 'reading…'); trace(2, 'active');
-    await delay(300);
-    trace(2, 'done', 'reading…'); trace(3, 'active');
-    await delay(300);
-    trace(3, 'done', 'reading…'); trace(4, 'active');
-
-    const t0 = Date.now();
-    try {
-      const res = await fetch(base() + '/api/send-to-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid })
-      });
-      const data = await res.json().catch(() => ({}));
-      const ms = Date.now() - t0;
-      const ok = res.status >= 200 && res.status < 300;
-      const r = data?.result ?? {};
-
-      if (ok) {
-        trace(1, 'done', '✓ token found');
-        trace(2, 'done', r.topic ? '✓ ' + r.topic : '✓ found');
-        trace(3, 'done', '✓ prompt loaded');
-        trace(4, 'done', '✓ ' + (r.success?.length ?? 1) + ' sent');
-        trace(5, 'done', '✓ logged');
-      } else {
-        const why = r.reason ?? data?.error ?? 'check response';
-        trace(1, 'done'); trace(2, 'done'); trace(3, 'done');
-        trace(4, 'fail', '✗ ' + why); trace(5, 'fail');
-      }
-      showRes('stu', res.status, data, ms);
-    } catch (e) {
-      trace(4, 'fail'); trace(5, 'fail');
-      showRes('stu', 0, { error: e.message }, Date.now() - t0);
-    } finally {
-      btn.disabled = false; btn.classList.remove('loading');
-    }
-  }
-
-  async function runCron() {
-    const secret = $('cron_secret').value.trim();
-    const btn = $('btnCron');
-    btn.disabled = true; btn.classList.add('loading');
-    const t0 = Date.now();
-    try {
-      const res = await fetch(base() + '/api/cron/morning-push', {
-        method: 'GET',
-        headers: secret ? { Authorization: 'Bearer ' + secret } : {}
-      });
-      const data = await res.json().catch(() => ({}));
-      showRes('cron', res.status, data, Date.now() - t0);
-    } catch (e) {
-      showRes('cron', 0, { error: e.message }, Date.now() - t0);
-    } finally {
-      btn.disabled = false; btn.classList.remove('loading');
-    }
-  }
+async function runBatchNow(){ await executeBatch(); }
 </script>
 </body>
 </html>
