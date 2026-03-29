@@ -2,30 +2,33 @@ import admin from "firebase-admin";
 
 export const config = { runtime: "nodejs" };
 
-let initialized = false;
-
 export function initFirebase() {
-  if (initialized || admin.apps.length > 0) return admin;
+  // Already initialized — just return
+  if (admin.apps.length > 0) return admin;
 
-  const { FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY } =
-    process.env;
+  const projectId    = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail  = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey   = process.env.FIREBASE_PRIVATE_KEY;
 
-  if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
+  if (!projectId || !clientEmail || !privateKey) {
     throw new Error(
-      "Missing Firebase ENV vars: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY"
+      `Missing Firebase env vars. Got: ` +
+      `PROJECT_ID=${!!projectId}, CLIENT_EMAIL=${!!clientEmail}, PRIVATE_KEY=${!!privateKey}`
     );
   }
 
+  // Vercel stores the key with literal \n — convert them to real newlines
+  const formattedKey = privateKey.replace(/\\n/g, "\n");
+
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: FIREBASE_PROJECT_ID,
-      clientEmail: FIREBASE_CLIENT_EMAIL,
-      privateKey: FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      projectId,
+      clientEmail,
+      privateKey: formattedKey,
     }),
   });
 
-  initialized = true;
-  console.log("🔥 Firebase Admin initialized:", FIREBASE_PROJECT_ID);
+  console.log("🔥 Firebase Admin initialized:", projectId);
   return admin;
 }
 
