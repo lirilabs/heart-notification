@@ -65,25 +65,27 @@ async function getUserPayload(uid) {
 }
 
 /**
- * prompts/{topic} → { title, body, imageUrl }
- * Supports both { messages: string[] } and { body: string } shapes.
+ * prompts — query by category field, pick a random doc
+ * Each doc has: { category, title, promptText, authorName, ... }
  */
 async function getPrompt(topic) {
-  const snap = await db.doc(`prompts/${topic}`).get();
-  if (!snap.exists) return { error: `no_prompt_for_topic:${topic}` };
+  const snap = await db
+    .collection("prompts")
+    .where("category", "==", topic)
+    .get();
 
-  const data  = snap.data();
-  const title = data?.title ?? topic;
+  if (snap.empty) return { error: `no_prompt_for_topic:${topic}` };
 
-  let body = null;
-  if (Array.isArray(data?.messages) && data.messages.length) {
-    body = data.messages[Math.floor(Math.random() * data.messages.length)];
-  } else if (typeof data?.body === "string") {
-    body = data.body;
-  }
+  // Pick a random document from the results
+  const docs = snap.docs;
+  const doc  = docs[Math.floor(Math.random() * docs.length)].data();
+
+  const title = doc?.title      ?? topic;
+  const body  = doc?.promptText ?? doc?.body ?? null;
 
   if (!body) return { error: "prompt_body_empty" };
-  return { title, body, imageUrl: data?.imageUrl ?? null };
+
+  return { title, body, imageUrl: doc?.imageUrl ?? null };
 }
 
 /** Send FCM to one or more device tokens */
