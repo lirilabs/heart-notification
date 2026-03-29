@@ -57,7 +57,10 @@ async function getUserPayload(uid) {
   const userSnap = await db.doc(`users/${uid}`).get();
   if (!userSnap.exists) return { error: "user_not_found" };
 
-  const rawToken = userSnap.data()?.fcmToken;
+  const data = userSnap.data();
+
+  // fcmToken — string or array field on the user doc
+  const rawToken = data?.fcmToken;
   if (!rawToken) return { error: "no_fcm_token" };
 
   const tokens = Array.isArray(rawToken)
@@ -65,15 +68,9 @@ async function getUserPayload(uid) {
     : [rawToken].filter(Boolean);
   if (!tokens.length) return { error: "empty_fcm_token" };
 
-  const catSnap = await db
-    .collection(`users/${uid}/personalizedCategory`)
-    .limit(1)
-    .get();
-
-  if (catSnap.empty) return { error: "no_personalized_category" };
-
-  const topic = catSnap.docs[0].data()?.topic;
-  if (!topic) return { error: "topic_field_missing" };
+  // personalizedCategory — direct string field on the user doc (NOT a subcollection)
+  const topic = data?.personalizedCategory;
+  if (!topic) return { error: "no_personalized_category" };
 
   return { tokens, topic };
 }
