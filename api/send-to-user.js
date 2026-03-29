@@ -66,7 +66,7 @@ async function getUserPayload(uid) {
 
 /**
  * prompts — query by category field, pick a random doc
- * Each doc has: { category, title, promptText, authorName, ... }
+ * Each doc has: { category, title, promptText, authorName, authorPhoto, ... }
  */
 async function getPrompt(topic) {
   const snap = await db
@@ -80,23 +80,43 @@ async function getPrompt(topic) {
   const docs = snap.docs;
   const doc  = docs[Math.floor(Math.random() * docs.length)].data();
 
-  const title = doc?.title      ?? topic;
-  const body  = doc?.promptText ?? doc?.body ?? null;
+  // Notification title: "🔥 Daily Development Prompt"
+  const title = `🔥 Daily ${topic} Prompt`;
 
-  if (!body) return { error: "prompt_body_empty" };
+  // Notification body: the actual prompt text (trimmed to 200 chars for preview)
+  const rawText = doc?.promptText ?? doc?.body ?? null;
+  if (!rawText) return { error: "prompt_body_empty" };
 
-  return { title, body, imageUrl: doc?.imageUrl ?? null };
+  const body = rawText.length > 200 ? rawText.slice(0, 197) + "…" : rawText;
+
+  // Extra data fields sent to the app (accessible in-app when tapped)
+  const extra = {
+    promptId:   doc?.id         ?? "",
+    promptText: rawText,
+    category:   doc?.category   ?? topic,
+    authorName: doc?.authorName ?? "",
+    authorPhoto:doc?.authorPhoto?? "",
+    fullTitle:  doc?.title      ?? topic,
+  };
+
+  return { title, body, imageUrl: doc?.imageUrl ?? null, extra };
 }
 
 /** Send FCM to one or more device tokens */
-async function sendFcm(tokens, { title, body, imageUrl }) {
+async function sendFcm(tokens, { title, body, imageUrl, extra = {} }) {
   const baseMessage = {
     notification: {
       title,
       body,
       ...(imageUrl ? { image: imageUrl } : {}),
     },
-    data: { sent_at: Date.now().toString() },
+    data: {
+      sent_at: Date.now().toString(),
+      // All extra fields stringified so the app can use them on tap
+      ...Object.fromEntries(
+        Object.entries(extra).map(([k, v]) => [k, String(v)])
+      ),
+    },
     android: {
       priority: "high",
       notification: {
