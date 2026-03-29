@@ -5,324 +5,344 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FCM Engine · Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg:      #08090f;
-  --surf:    #0e0f18;
-  --surf2:   #12131e;
-  --surf3:   #181927;
-  --border:  #1e2030;
-  --border2: #272940;
-  --accent:  #5b8dee;
-  --accent2: #7c6df5;
-  --glow:    rgba(91,141,238,.18);
-  --green:   #3ddc97;
-  --red:     #ff5470;
-  --yellow:  #f4c842;
-  --purple:  #c084fc;
-  --orange:  #fb923c;
-  --text:    #d6daf0;
-  --muted:   #4a4d6a;
-  --mono:    'IBM Plex Mono', monospace;
-  --display: 'Syne', sans-serif;
+:root{
+  --bg:#08090f; --surf:#0d0e1a; --surf2:#111220; --surf3:#181927;
+  --border:#1b1d2e; --border2:#242638;
+  --accent:#5b8dee; --accent2:#7c6df5;
+  --green:#3ddc97; --red:#ff5470; --yellow:#f4c842; --purple:#c084fc; --orange:#fb923c;
+  --text:#d4d8f0; --muted:#434560;
+  --mono:'IBM Plex Mono',monospace; --ui:'Syne',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--display);min-height:100vh;overflow-x:hidden}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.025;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:128px}
+body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
+
+/* grid bg */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:60px 60px;opacity:.35}
+  background-image:linear-gradient(rgba(91,141,238,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(91,141,238,.04) 1px,transparent 1px);
+  background-size:52px 52px}
 
-.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:48px 24px 120px}
+.wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:44px 22px 110px}
 
-/* Header */
-.header{margin-bottom:52px}
-.header-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
-.logo{display:flex;align-items:center;gap:14px}
-.logo-icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0;
-  background:linear-gradient(135deg,rgba(91,141,238,.2),rgba(124,109,245,.2));
-  border:1px solid rgba(91,141,238,.35);box-shadow:0 0 32px rgba(91,141,238,.2),inset 0 1px 0 rgba(255,255,255,.06)}
-.logo-text h1{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1}
+/* ── topbar ── */
+.topbar{display:flex;align-items:center;gap:14px;margin-bottom:44px;padding-bottom:22px;border-bottom:1px solid var(--border)}
+.logo-mark{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(91,141,238,.18),rgba(124,109,245,.18));
+  border:1px solid rgba(91,141,238,.3);box-shadow:0 0 24px rgba(91,141,238,.15)}
+.logo-text h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
 .logo-text h1 em{color:var(--accent);font-style:normal}
-.logo-text p{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
-.tag{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border2);padding:5px 12px;border-radius:20px;letter-spacing:.5px;align-self:flex-start;margin-top:4px}
+.logo-text p{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.project-tag{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border2);padding:5px 12px;border-radius:20px}
 
-.url-bar{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--border2);border-radius:12px;padding:11px 18px}
-.url-bar .pill{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--bg);background:var(--accent);padding:3px 8px;border-radius:4px;white-space:nowrap;font-weight:600}
+/* base url */
+.url-bar{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--border2);border-radius:11px;padding:11px 16px;margin-bottom:32px}
+.url-pill{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;background:var(--accent);color:#06070d;padding:3px 8px;border-radius:4px;white-space:nowrap}
 .url-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px}
 .url-bar input::placeholder{color:var(--muted)}
 
-/* Stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:44px}
-.stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px 20px;position:relative;overflow:hidden}
-.stat::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(255,255,255,.02));pointer-events:none}
-.stat-l{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
-.stat-n{font-size:32px;font-weight:800;margin-top:6px;line-height:1;font-family:var(--mono)}
-.ca{color:var(--accent)} .cg{color:var(--green)} .cr{color:var(--red)}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:44px}
+.stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:15px 18px}
+.stat-l{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.stat-n{font-size:28px;font-weight:800;margin-top:5px;line-height:1;font-family:var(--mono)}
+.ca{color:var(--accent)}.cg{color:var(--green)}.cr{color:var(--red)}.cy{color:var(--yellow)}
 
-/* Section label */
-.section-label{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.section-label .idx{font-family:var(--mono);font-size:9px;font-weight:600;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;background:var(--accent);color:var(--bg)}
-.section-label .title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+/* section label */
+.sec{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.sec-n{font-family:var(--mono);font-size:9px;font-weight:600;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0;background:var(--accent);color:#06070d}
+.sec-t{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* Card */
-.card{background:var(--surf);border:1px solid var(--border);border-radius:16px;margin-bottom:24px;overflow:hidden;transition:border-color .3s}
+/* card */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:15px;margin-bottom:22px;overflow:hidden;transition:border-color .25s}
 .card:hover{border-color:var(--border2)}
-.card-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.method{font-family:var(--mono);font-size:10px;font-weight:600;padding:4px 9px;border-radius:5px}
-.method.post{background:rgba(61,220,151,.1);color:var(--green);border:1px solid rgba(61,220,151,.25)}
-.method.get{background:rgba(244,200,66,.1);color:var(--yellow);border:1px solid rgba(244,200,66,.25)}
-.endpoint{font-family:var(--mono);font-size:13px;color:var(--text)}
-.desc{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)}
-.card-body{padding:24px}
+.card-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:5px}
+.badge.post{background:rgba(61,220,151,.1);color:var(--green);border:1px solid rgba(61,220,151,.22)}
+.badge.get{background:rgba(244,200,66,.1);color:var(--yellow);border:1px solid rgba(244,200,66,.22)}
+.badge.api{background:rgba(91,141,238,.1);color:var(--accent);border:1px solid rgba(91,141,238,.22)}
+.ep{font-family:var(--mono);font-size:12px}
+.ep-desc{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.card-body{padding:22px}
 
-/* Fields */
-.field{margin-bottom:14px}
-.field label,.inp-label{display:block;font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:500}
-.inp{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
-.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,141,238,.1)}
+/* fields */
+.field{margin-bottom:13px}
+.field label,.flabel{display:block;font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;font-weight:500}
+.inp{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:9px;padding:11px 15px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,141,238,.09)}
 .inp::placeholder{color:var(--muted)}
 
-/* Flow trace */
-.trace{display:flex;flex-direction:column;gap:5px;margin:16px 0}
-.t{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 12px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);transition:all .25s}
-.t .dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .3s}
-.t.active{color:var(--accent);border-color:rgba(91,141,238,.3);background:rgba(91,141,238,.05)}
-.t.active .dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
-.t.done{color:var(--green);border-color:rgba(61,220,151,.25);background:rgba(61,220,151,.05)}
-.t.done .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
-.t.fail{color:var(--red);border-color:rgba(255,84,112,.25);background:rgba(255,84,112,.05)}
-.t.fail .dot{background:var(--red);box-shadow:0 0 8px var(--red)}
-.t-val{margin-left:auto;color:var(--purple);font-size:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* trace */
+.trace{display:flex;flex-direction:column;gap:5px;margin:14px 0}
+.tr{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 12px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);transition:all .2s}
+.tr .dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all .3s}
+.tr.active{color:var(--accent);border-color:rgba(91,141,238,.28);background:rgba(91,141,238,.05)}
+.tr.active .dot{background:var(--accent);box-shadow:0 0 7px var(--accent)}
+.tr.done{color:var(--green);border-color:rgba(61,220,151,.22);background:rgba(61,220,151,.04)}
+.tr.done .dot{background:var(--green);box-shadow:0 0 7px var(--green)}
+.tr.fail{color:var(--red);border-color:rgba(255,84,112,.22);background:rgba(255,84,112,.04)}
+.tr.fail .dot{background:var(--red);box-shadow:0 0 7px var(--red)}
+.tr-val{margin-left:auto;color:var(--purple);font-size:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* Buttons */
-.btn{width:100%;padding:14px;border:none;border-radius:11px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.2px;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s,transform .15s;margin-top:18px}
-.btn:disabled{opacity:.35;cursor:not-allowed}
-.btn:hover:not(:disabled){opacity:.88;transform:translateY(-1px)}
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border:none;border-radius:10px;cursor:pointer;font-family:var(--ui);font-weight:700;font-size:13px;letter-spacing:.15px;width:100%;transition:opacity .2s,transform .15s;margin-top:16px}
+.btn:disabled{opacity:.32;cursor:not-allowed}
+.btn:hover:not(:disabled){opacity:.85;transform:translateY(-1px)}
 .btn:active:not(:disabled){transform:scale(.99)}
-.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 24px rgba(91,141,238,.3)}
-.btn.ghost-red{background:rgba(255,84,112,.1);color:var(--red);border:1px solid rgba(255,84,112,.28);box-shadow:none}
-.btn.ghost-yellow{background:rgba(244,200,66,.09);color:var(--yellow);border:1px solid rgba(244,200,66,.25);box-shadow:none}
-.btn .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 5px 20px rgba(91,141,238,.28)}
+.btn.green-grad{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 5px 20px rgba(16,185,129,.25)}
+.btn.ghost-r{background:rgba(255,84,112,.1);color:var(--red);border:1px solid rgba(255,84,112,.26);box-shadow:none}
+.btn.ghost-y{background:rgba(244,200,66,.08);color:var(--yellow);border:1px solid rgba(244,200,66,.22);box-shadow:none}
+.btn .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.22);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
 .btn.loading .spin{display:block}
 .btn.loading .lbl{display:none}
-.btn-row{display:flex;gap:10px;margin-top:18px}
+.btn-row{display:flex;gap:8px;margin-top:16px}
 .btn-row .btn{margin-top:0;flex:1}
-.btn-row .btn.sm{flex:0 0 auto;width:auto;padding:14px 20px}
+.btn-row .btn.sm{flex:0 0 auto;width:auto;padding:13px 17px}
 
-/* Scheduler */
-.sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.sched-cell{background:var(--surf2);border:1px solid var(--border2);border-radius:12px;padding:16px 18px}
-.sched-cell label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:10px}
-.time-inp{width:100%;background:transparent;border:none;outline:none;color:var(--accent);font-family:var(--mono);font-size:26px;font-weight:600}
-.time-inp::-webkit-calendar-picker-indicator{filter:invert(1) sepia(1) saturate(3) hue-rotate(185deg);opacity:.5;cursor:pointer}
-.tz-sel{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:13px;cursor:pointer}
-.tz-sel option{background:#12131e}
+/* ── Schedule slots ── */
+.slots-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.slot-card{background:var(--surf2);border:1px solid var(--border2);border-radius:12px;padding:16px;transition:border-color .2s;position:relative}
+.slot-card.enabled{border-color:rgba(91,141,238,.35);background:rgba(91,141,238,.04)}
+.slot-card.enabled.s2{border-color:rgba(61,220,151,.3);background:rgba(61,220,151,.03)}
+.slot-card.enabled.s3{border-color:rgba(244,200,66,.3);background:rgba(244,200,66,.03)}
+.slot-card.enabled.s4{border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.03)}
 
-.mode-row{display:flex;gap:8px;margin-bottom:14px}
-.mode-btn{flex:1;padding:9px;border:1px solid var(--border2);border-radius:9px;background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
-.mode-btn.on{border-color:rgba(91,141,238,.45);background:rgba(91,141,238,.1);color:var(--accent)}
+.slot-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.slot-name{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.slot-card.enabled   .slot-name{color:var(--accent)}
+.slot-card.enabled.s2 .slot-name{color:var(--green)}
+.slot-card.enabled.s3 .slot-name{color:var(--yellow)}
+.slot-card.enabled.s4 .slot-name{color:var(--orange)}
 
-/* Arm status */
-.arm-bar{display:flex;align-items:center;gap:11px;padding:12px 16px;border-radius:10px;background:var(--surf2);border:1px solid var(--border);margin-bottom:0;font-family:var(--mono);font-size:11px;min-height:44px}
-.arm-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:all .3s}
-.arm-dot.armed {background:var(--green); box-shadow:0 0 10px var(--green); animation:pulse 2s ease-in-out infinite}
-.arm-dot.soon  {background:var(--yellow);box-shadow:0 0 10px var(--yellow);animation:pulse .8s ease-in-out infinite}
-.arm-dot.firing{background:var(--orange);box-shadow:0 0 12px var(--orange)}
-.arm-lbl{color:var(--muted);transition:color .3s}
-.arm-lbl.armed {color:var(--green)}
-.arm-lbl.soon  {color:var(--yellow)}
-.arm-lbl.firing{color:var(--orange)}
-.arm-cd{margin-left:auto;color:var(--purple);font-size:14px;font-weight:600;letter-spacing:1.5px;font-family:var(--mono)}
+/* toggle switch */
+.toggle{position:relative;width:38px;height:21px;flex-shrink:0;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:21px;background:var(--border2);transition:background .2s}
+.toggle input:checked ~ .toggle-track{background:var(--accent)}
+.slot-card.s2 .toggle input:checked ~ .toggle-track{background:var(--green)}
+.slot-card.s3 .toggle input:checked ~ .toggle-track{background:var(--yellow)}
+.slot-card.s4 .toggle input:checked ~ .toggle-track{background:var(--orange)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.toggle input:checked ~ .toggle-thumb{transform:translateX(17px)}
 
-/* Callout */
-.callout{border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:12px;line-height:1.7}
+/* time display in slot */
+.slot-time-row{display:flex;align-items:baseline;gap:6px}
+.slot-time-inp{background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:22px;font-weight:600;width:90px}
+.slot-card.enabled    .slot-time-inp{color:var(--accent)}
+.slot-card.enabled.s2 .slot-time-inp{color:var(--green)}
+.slot-card.enabled.s3 .slot-time-inp{color:var(--yellow)}
+.slot-card.enabled.s4 .slot-time-inp{color:var(--orange)}
+.slot-time-inp::-webkit-calendar-picker-indicator{filter:invert(.5);opacity:.5;cursor:pointer}
+.slot-tz-label{font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
+
+.slot-utc{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px}
+
+/* tz selector (global) */
+.tz-row{display:flex;align-items:center;gap:12px;background:var(--surf2);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;margin-bottom:14px}
+.tz-row label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+.tz-sel{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:12px;cursor:pointer}
+.tz-sel option{background:#111220}
+
+/* save status */
+.save-bar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;padding:10px 14px;border-radius:9px;background:var(--surf2);border:1px solid var(--border);margin-bottom:14px;min-height:40px}
+.save-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:all .3s}
+.save-dot.saved{background:var(--green);box-shadow:0 0 7px var(--green)}
+.save-dot.saving{background:var(--yellow);box-shadow:0 0 7px var(--yellow);animation:pulse 1s ease-in-out infinite}
+.save-dot.err{background:var(--red);box-shadow:0 0 7px var(--red)}
+.save-lbl{color:var(--muted)}
+.save-lbl.saved{color:var(--green)}
+.save-lbl.saving{color:var(--yellow)}
+.save-lbl.err{color:var(--red)}
+.save-time{margin-left:auto;color:var(--muted);font-size:10px}
+
+/* next-fire chips */
+.next-fires{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.fire-chip{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);color:var(--muted)}
+.fire-chip.on{border-color:rgba(91,141,238,.35);color:var(--accent);background:rgba(91,141,238,.06)}
+.fire-chip.on.s2{border-color:rgba(61,220,151,.3);color:var(--green);background:rgba(61,220,151,.05)}
+.fire-chip.on.s3{border-color:rgba(244,200,66,.3);color:var(--yellow);background:rgba(244,200,66,.05)}
+.fire-chip.on.s4{border-color:rgba(251,146,60,.3);color:var(--orange);background:rgba(251,146,60,.05)}
+
+/* callout */
+.callout{border-radius:9px;padding:12px 15px;margin-bottom:14px;font-size:12px;line-height:1.7}
 .callout.info{background:rgba(91,141,238,.07);border:1px solid rgba(91,141,238,.2)}
 .callout.warn{background:rgba(244,200,66,.06);border:1px solid rgba(244,200,66,.18)}
+.callout.green{background:rgba(61,220,151,.06);border:1px solid rgba(61,220,151,.2)}
 .callout h5{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
-.callout.info h5{color:var(--accent)}
-.callout.warn h5{color:var(--yellow)}
+.callout.info  h5{color:var(--accent)}
+.callout.warn  h5{color:var(--yellow)}
+.callout.green h5{color:var(--green)}
 .callout code{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px}
+.callout ol{margin-left:18px}
+.callout li{margin-bottom:3px}
 
-/* Thin divider */
-.hr{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:20px 0}
-
-/* Response pane */
-.res{display:none;margin-top:16px;border-radius:11px;overflow:hidden;border:1px solid var(--border)}
+/* response pane */
+.res{display:none;margin-top:14px;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
 .res.show{display:block}
-.res-bar{display:flex;align-items:center;gap:9px;padding:9px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.res-bar{display:flex;align-items:center;gap:8px;padding:8px 13px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
 .rdot{width:7px;height:7px;border-radius:50%}
-.rdot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
-.rdot.err{background:var(--red);box-shadow:0 0 6px var(--red)}
+.rdot.ok{background:var(--green);box-shadow:0 0 5px var(--green)}
+.rdot.err{background:var(--red);box-shadow:0 0 5px var(--red)}
 .rcode.ok{color:var(--green);font-weight:700}
 .rcode.err{color:var(--red);font-weight:700}
 .rms{margin-left:auto;color:var(--muted)}
-pre.rbody{padding:16px;font-family:var(--mono);font-size:11px;line-height:1.9;color:#6a7090;background:#070810;overflow-x:auto;max-height:280px;white-space:pre-wrap;word-break:break-all}
+pre.rbody{padding:15px;font-family:var(--mono);font-size:11px;line-height:1.9;color:#636580;background:#070810;overflow-x:auto;max-height:260px;white-space:pre-wrap;word-break:break-all}
+
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:18px 0}
 
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@media(max-width:540px){.stats{grid-template-columns:1fr}.sched-grid{grid-template-columns:1fr}.desc{display:none}}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.slots-grid{grid-template-columns:1fr}.ep-desc{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- ── Header ── -->
-  <div class="header">
-    <div class="header-top">
-      <div class="logo">
-        <div class="logo-icon">🔔</div>
-        <div class="logo-text">
-          <h1>FCM <em>Engine</em></h1>
-          <p>Notification Console</p>
-        </div>
-      </div>
-      <div class="tag">promora-9ab6e</div>
+  <!-- topbar -->
+  <div class="topbar">
+    <div class="logo-mark">🔔</div>
+    <div class="logo-text">
+      <h1>FCM <em>Engine</em></h1>
+      <p>Notification Console</p>
     </div>
-    <div class="url-bar">
-      <div class="pill">BASE URL</div>
-      <input type="text" id="baseUrl" placeholder="https://your-app.vercel.app"/>
-    </div>
+    <div class="project-tag">promora-9ab6e</div>
   </div>
 
-  <!-- ── Stats ── -->
+  <!-- base url -->
+  <div class="url-bar">
+    <div class="url-pill">BASE URL</div>
+    <input type="text" id="baseUrl" placeholder="https://your-app.vercel.app"/>
+  </div>
+
+  <!-- stats -->
   <div class="stats">
-    <div class="stat"><div class="stat-l">Total Calls</div><div class="stat-n ca" id="sT">0</div></div>
+    <div class="stat"><div class="stat-l">API Calls</div><div class="stat-n ca" id="sT">0</div></div>
     <div class="stat"><div class="stat-l">Succeeded</div><div class="stat-n cg" id="sO">0</div></div>
     <div class="stat"><div class="stat-l">Failed</div><div class="stat-n cr" id="sF">0</div></div>
+    <div class="stat"><div class="stat-l">Schedules Active</div><div class="stat-n cy" id="sActive">—</div></div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       SECTION 1 — Individual · instant send
-  ══════════════════════════════════════════════ -->
-  <div class="section-label"><span class="idx">1</span><span class="title">Individual — Instant Send</span></div>
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 1 — Individual: instant send
+  ══════════════════════════════════════════════════════ -->
+  <div class="sec"><span class="sec-n">1</span><span class="sec-t">Individual — Instant Send</span></div>
   <div class="card">
     <div class="card-head">
-      <span class="method post">POST</span>
-      <span class="endpoint">/api/send-to-user</span>
-      <span class="desc">single UID → fires immediately</span>
+      <span class="badge post">POST</span>
+      <span class="ep">/api/send-to-user</span>
+      <span class="ep-desc">single UID · fires immediately</span>
     </div>
     <div class="card-body">
-
       <div class="field">
         <label>User UID *</label>
         <input class="inp" type="text" id="uid_input" placeholder="Paste Firestore user UID here…"/>
       </div>
-
       <div class="trace">
-        <div class="t" id="tr1"><div class="dot"></div><span>users/{uid} → fcmToken</span><span class="t-val" id="tr1v"></span></div>
-        <div class="t" id="tr2"><div class="dot"></div><span>personalizedCategory → topic</span><span class="t-val" id="tr2v"></span></div>
-        <div class="t" id="tr3"><div class="dot"></div><span>prompts/{topic} → title + body</span><span class="t-val" id="tr3v"></span></div>
-        <div class="t" id="tr4"><div class="dot"></div><span>FCM → push notification dispatched</span><span class="t-val" id="tr4v"></span></div>
-        <div class="t" id="tr5"><div class="dot"></div><span>notificationLog → audit written</span><span class="t-val" id="tr5v"></span></div>
+        <div class="tr" id="tr1"><div class="dot"></div><span>users/{uid} → fcmToken</span><span class="tr-val" id="tr1v"></span></div>
+        <div class="tr" id="tr2"><div class="dot"></div><span>personalizedCategory → topic</span><span class="tr-val" id="tr2v"></span></div>
+        <div class="tr" id="tr3"><div class="dot"></div><span>prompts/{topic} → title + body</span><span class="tr-val" id="tr3v"></span></div>
+        <div class="tr" id="tr4"><div class="dot"></div><span>FCM → push dispatched</span><span class="tr-val" id="tr4v"></span></div>
+        <div class="tr" id="tr5"><div class="dot"></div><span>notificationLog → audit written</span><span class="tr-val" id="tr5v"></span></div>
       </div>
-
       <button class="btn primary" id="btnStu" onclick="runSendToUser()">
-        <div class="spin"></div>
-        <span class="lbl">⚡&nbsp; Send Now</span>
+        <div class="spin"></div><span class="lbl">⚡&nbsp; Send Now</span>
       </button>
-
       <div class="res" id="res_stu">
-        <div class="res-bar">
-          <div class="rdot" id="rdot_stu"></div>
-          <span class="rcode" id="rcode_stu"></span>
-          <span id="rlabel_stu"></span>
-          <span class="rms" id="rms_stu"></span>
-        </div>
+        <div class="res-bar"><div class="rdot" id="rdot_stu"></div><span class="rcode" id="rcode_stu"></span><span id="rlabel_stu"></span><span class="rms" id="rms_stu"></span></div>
         <pre class="rbody" id="rbody_stu"></pre>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       SECTION 2 — All Users · scheduled batch
-  ══════════════════════════════════════════════ -->
-  <div class="section-label"><span class="idx">2</span><span class="title">All Users — Scheduled Batch</span></div>
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 2 — Server-level scheduling (up to 4 slots)
+  ══════════════════════════════════════════════════════ -->
+  <div class="sec"><span class="sec-n">2</span><span class="sec-t">All Users — Server Schedule</span></div>
   <div class="card">
     <div class="card-head">
-      <span class="method get">GET</span>
-      <span class="endpoint">/api/cron/morning-push</span>
-      <span class="desc">all users · fires at scheduled time</span>
+      <span class="badge api">API</span>
+      <span class="ep">/api/schedules &nbsp;+&nbsp; /api/cron/push</span>
+      <span class="ep-desc">saved in Firestore · Vercel runs every 30 min</span>
     </div>
     <div class="card-body">
 
-      <div class="callout warn">
-        <h5>⏰ Browser-side timer</h5>
-        Keep this tab open until the timer fires. For a permanent server-side daily schedule,
-        set <code>30 6 * * *</code> (= 12:00 PM IST) in your <code>vercel.json</code> crons config.
+      <div class="callout info">
+        <h5>🖥 How server-level scheduling works</h5>
+        Times you set here are <strong>saved to Firestore</strong> (<code>config/schedules</code>).
+        Vercel runs <code>/api/cron/push</code> every <strong>30 minutes</strong> automatically.
+        Each run checks if the current UTC time matches any enabled slot (±28 min window).
+        If it matches, the batch fires. <strong>The HTML page does not need to stay open.</strong>
+        <br/>Also: duplicate devices (same FCM token across different user accounts) receive only <strong>one notification</strong>.
       </div>
 
       <!-- CRON_SECRET -->
       <div class="field">
-        <label>CRON_SECRET &nbsp;<span style="color:var(--muted);font-size:9px;font-family:var(--mono)">— from Vercel env vars · leave blank if not set</span></label>
-        <input class="inp" type="password" id="cron_secret" placeholder="Your CRON_SECRET value…"/>
+        <label>CRON_SECRET &nbsp;<span style="color:var(--muted)">— Vercel env var · leave blank if not set</span></label>
+        <input class="inp" type="password" id="cron_secret" placeholder="Paste your CRON_SECRET value…"/>
       </div>
 
-      <div class="hr"></div>
-      <div class="inp-label" style="margin-bottom:12px">Schedule</div>
+      <div class="hr"/>
 
-      <!-- Mode toggle -->
-      <div class="mode-row">
-        <button class="mode-btn on" id="modeOnce"  onclick="setMode('once')">🔂&nbsp; One-time</button>
-        <button class="mode-btn"    id="modeDaily" onclick="setMode('daily')">🔁&nbsp; Daily repeat</button>
+      <!-- Timezone selector -->
+      <div class="tz-row">
+        <label>Display Timezone</label>
+        <select class="tz-sel" id="global_tz" onchange="onTzChange()">
+          <option value="Asia/Kolkata" selected>🇮🇳 IST — India (UTC+5:30)</option>
+          <option value="UTC">🌐 UTC</option>
+          <option value="America/New_York">🇺🇸 EST — New York (UTC−5)</option>
+          <option value="America/Los_Angeles">🇺🇸 PST — Los Angeles (UTC−8)</option>
+          <option value="Europe/London">🇬🇧 GMT — London</option>
+          <option value="Europe/Paris">🇪🇺 CET — Paris (UTC+1)</option>
+          <option value="Asia/Singapore">🇸🇬 SGT — Singapore (UTC+8)</option>
+          <option value="Asia/Dubai">🇦🇪 GST — Dubai (UTC+4)</option>
+          <option value="Asia/Tokyo">🇯🇵 JST — Tokyo (UTC+9)</option>
+        </select>
       </div>
 
-      <!-- Time + TZ -->
-      <div class="sched-grid">
-        <div class="sched-cell">
-          <label>Fire at</label>
-          <input class="time-inp" type="time" id="sched_time" value="06:30"/>
-        </div>
-        <div class="sched-cell">
-          <label>Timezone</label>
-          <select class="tz-sel" id="sched_tz">
-            <option value="Asia/Kolkata" selected>🇮🇳 IST — India</option>
-            <option value="UTC">🌐 UTC</option>
-            <option value="America/New_York">🇺🇸 EST — New York</option>
-            <option value="America/Los_Angeles">🇺🇸 PST — Los Angeles</option>
-            <option value="Europe/London">🇬🇧 GMT — London</option>
-            <option value="Europe/Paris">🇪🇺 CET — Paris</option>
-            <option value="Asia/Singapore">🇸🇬 SGT — Singapore</option>
-            <option value="Asia/Dubai">🇦🇪 GST — Dubai</option>
-            <option value="Asia/Tokyo">🇯🇵 JST — Tokyo</option>
-          </select>
-        </div>
+      <!-- 4 slot cards -->
+      <div class="flabel" style="margin-bottom:10px">Schedule Slots (up to 4 per day)</div>
+      <div class="slots-grid" id="slotsGrid">
+        <!-- rendered by JS -->
       </div>
 
-      <!-- Countdown / status bar -->
-      <div class="arm-bar">
-        <div class="arm-dot" id="armDot"></div>
-        <span class="arm-lbl" id="armLbl">Not armed — pick a time then click Arm</span>
-        <span class="arm-cd"  id="armCd"></span>
+      <!-- next-fire preview -->
+      <div class="flabel" style="margin-bottom:8px">Next Fire Times (UTC)</div>
+      <div class="next-fires" id="nextFires">—</div>
+
+      <!-- save status bar -->
+      <div class="save-bar">
+        <div class="save-dot" id="saveDot"></div>
+        <span class="save-lbl" id="saveLbl">Load schedule to begin</span>
+        <span class="save-time" id="saveTime"></span>
       </div>
 
-      <!-- Action buttons -->
+      <!-- action buttons -->
       <div class="btn-row">
-        <button class="btn primary" id="btnArm" onclick="armBatch()">
-          <div class="spin"></div>
-          <span class="lbl">🕐&nbsp; Arm Schedule</span>
+        <button class="btn primary" onclick="loadSchedule()">
+          <div class="spin"></div><span class="lbl">↓ Load from Server</span>
         </button>
-        <button class="btn ghost-red sm" id="btnDisarm" onclick="disarmBatch()" disabled>
-          <span class="lbl">✕ Disarm</span>
-        </button>
-        <button class="btn ghost-yellow sm" id="btnNow" onclick="runBatchNow()">
-          <div class="spin"></div>
-          <span class="lbl">▶ Run Now</span>
+        <button class="btn green-grad" id="btnSave" onclick="saveSchedule()">
+          <div class="spin"></div><span class="lbl">↑ Save to Server</span>
         </button>
       </div>
+
+      <div class="hr"/>
+
+      <!-- manual trigger -->
+      <div class="flabel" style="margin-bottom:10px">Manual Trigger</div>
+      <div class="callout warn" style="margin-bottom:10px">
+        <h5>▶ Run batch now</h5>
+        Fires <code>/api/cron/push</code> immediately, bypassing the schedule check — useful for testing.
+      </div>
+      <button class="btn ghost-y" id="btnNow" onclick="runBatchNow()">
+        <div class="spin"></div><span class="lbl">▶ Run Batch Now (bypass schedule)</span>
+      </button>
 
       <div class="res" id="res_cron">
-        <div class="res-bar">
-          <div class="rdot" id="rdot_cron"></div>
-          <span class="rcode" id="rcode_cron"></span>
-          <span id="rlabel_cron"></span>
-          <span class="rms" id="rms_cron"></span>
-        </div>
+        <div class="res-bar"><div class="rdot" id="rdot_cron"></div><span class="rcode" id="rcode_cron"></span><span id="rlabel_cron"></span><span class="rms" id="rms_cron"></span></div>
         <pre class="rbody" id="rbody_cron"></pre>
       </div>
 
@@ -332,61 +352,296 @@ pre.rbody{padding:16px;font-family:var(--mono);font-size:11px;line-height:1.9;co
 </div><!-- /wrap -->
 
 <script>
+/* ── State ── */
 const DEFAULT_BASE = 'https://heart-notification.vercel.app';
 let sT=0,sO=0,sF=0;
 const $ = id => document.getElementById(id);
 
-/* ── Persist ── */
+/* Slot definitions: local (display) time + enabled toggle */
+const SLOT_DEFS = [
+  { id:'slot_1', label:'Morning',   color:'s1', defaultLocal:'07:00' },
+  { id:'slot_2', label:'Afternoon', color:'s2', defaultLocal:'12:00' },
+  { id:'slot_3', label:'Evening',   color:'s3', defaultLocal:'17:00' },
+  { id:'slot_4', label:'Night',     color:'s4', defaultLocal:'21:00' },
+];
+
+/* Loaded from server */
+let serverSlots = null;
+
+/* ── Persist base URL & secret ── */
 window.addEventListener('DOMContentLoaded', () => {
-  $('baseUrl').value     = localStorage.getItem('fcm_base')   || DEFAULT_BASE;
-  $('cron_secret').value = localStorage.getItem('fcm_secret') || '';
-  $('sched_time').value  = localStorage.getItem('fcm_time')   || '06:30';
-  $('sched_tz').value    = localStorage.getItem('fcm_tz')     || 'Asia/Kolkata';
+  $('baseUrl').value      = localStorage.getItem('fcm_base')   || DEFAULT_BASE;
+  $('cron_secret').value  = localStorage.getItem('fcm_secret') || '';
+  $('global_tz').value    = localStorage.getItem('fcm_tz')     || 'Asia/Kolkata';
 
   $('baseUrl').addEventListener('change',    () => localStorage.setItem('fcm_base',   $('baseUrl').value.trim()));
   $('cron_secret').addEventListener('change',() => localStorage.setItem('fcm_secret', $('cron_secret').value.trim()));
-  $('sched_time').addEventListener('change', () => localStorage.setItem('fcm_time',   $('sched_time').value));
-  $('sched_tz').addEventListener('change',   () => localStorage.setItem('fcm_tz',     $('sched_tz').value));
+  $('global_tz').addEventListener('change',  () => localStorage.setItem('fcm_tz',     $('global_tz').value));
+
+  renderSlots(defaultSlots());
+  loadSchedule();
 });
 
 function base(){ return $('baseUrl').value.trim().replace(/\/$/,'') || DEFAULT_BASE; }
+function secret(){ return $('cron_secret').value.trim(); }
+function tz(){ return $('global_tz').value; }
 
 /* ── Stats ── */
 function bump(ok){ sT++; if(ok)sO++; else sF++; $('sT').textContent=sT; $('sO').textContent=sO; $('sF').textContent=sF; }
 
 /* ── Response pane ── */
 function showRes(id, status, data, ms){
-  const ok = status>=200 && status<300;
+  const ok = status>=200&&status<300;
   $('res_'+id).classList.add('show');
   $('rdot_'+id).className    = 'rdot '+(ok?'ok':'err');
   $('rcode_'+id).className   = 'rcode '+(ok?'ok':'err');
-  $('rcode_'+id).textContent  = status || 'ERR';
-  $('rlabel_'+id).textContent = ok ? '✓ Success' : '✗ Failed';
+  $('rcode_'+id).textContent  = status||'ERR';
+  $('rlabel_'+id).textContent = ok?'✓ Success':'✗ Failed';
   $('rms_'+id).textContent    = ms+'ms';
   $('rbody_'+id).textContent  = JSON.stringify(data,null,2);
   bump(ok);
 }
 
 /* ── Trace ── */
-function resetTrace(){ for(let i=1;i<=5;i++){ $('tr'+i).className='t'; $('tr'+i+'v').textContent=''; } }
-function trace(i,s,v=''){ $('tr'+i).className='t '+s; if(v) $('tr'+i+'v').textContent=v; }
+function resetTrace(){ for(let i=1;i<=5;i++){ $('tr'+i).className='tr'; $('tr'+i+'v').textContent=''; } }
+function trace(i,s,v=''){ $('tr'+i).className='tr '+s; if(v) $('tr'+i+'v').textContent=v; }
 const delay = ms => new Promise(r=>setTimeout(r,ms));
 
-/* ════════════════════════════════
-   1 — Individual instant send
-════════════════════════════════ */
+/* ══════════════════════════════════
+   TZ utilities
+══════════════════════════════════ */
+function getOffsetMins(timezone) {
+  // Get UTC offset in minutes for a given IANA timezone at current moment
+  const now = new Date();
+  const utcStr = now.toLocaleString('en-US', {timeZone:'UTC', hour12:false, hour:'2-digit', minute:'2-digit'});
+  const tzStr  = now.toLocaleString('en-US', {timeZone: timezone, hour12:false, hour:'2-digit', minute:'2-digit'});
+  const toMins = s => { const [h,m] = s.split(':').map(Number); return h*60+m; };
+  let diff = toMins(tzStr) - toMins(utcStr);
+  // Handle midnight crossing
+  if(diff > 720)  diff -= 1440;
+  if(diff < -720) diff += 1440;
+  return diff; // positive = east of UTC
+}
+
+function localToUtc(localHH, localMM, timezone) {
+  const offset = getOffsetMins(timezone); // minutes east
+  let utcMins = localHH*60 + localMM - offset;
+  utcMins = ((utcMins % 1440) + 1440) % 1440; // wrap 0-1439
+  return { utcHour: Math.floor(utcMins/60), utcMinute: utcMins%60 };
+}
+
+function utcToLocal(utcHour, utcMinute, timezone) {
+  const offset = getOffsetMins(timezone);
+  let localMins = utcHour*60 + utcMinute + offset;
+  localMins = ((localMins % 1440) + 1440) % 1440;
+  return { localHour: Math.floor(localMins/60), localMinute: localMins%60 };
+}
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtUtc(h,m){ return `${pad(h)}:${pad(m)} UTC`; }
+function fmtLocal(h,m){ return `${pad(h)}:${pad(m)}`; }
+
+/* ══════════════════════════════════
+   Slot default builder
+══════════════════════════════════ */
+function defaultSlots(){
+  return SLOT_DEFS.map(def => {
+    const [lh,lm] = def.defaultLocal.split(':').map(Number);
+    const { utcHour, utcMinute } = localToUtc(lh, lm, tz());
+    return { id:def.id, label:def.label, utcHour, utcMinute, enabled: def.id==='slot_1' };
+  });
+}
+
+/* ══════════════════════════════════
+   Render slot cards
+══════════════════════════════════ */
+function renderSlots(slots){
+  serverSlots = slots;
+  $('sActive').textContent = slots.filter(s=>s.enabled).length;
+
+  const grid = $('slotsGrid');
+  grid.innerHTML = '';
+
+  slots.forEach((slot, idx) => {
+    const def      = SLOT_DEFS[idx] || SLOT_DEFS[idx % SLOT_DEFS.length];
+    const colorCls = def.color;
+    const { localHour, localMinute } = utcToLocal(slot.utcHour, slot.utcMinute, tz());
+    const localVal = `${pad(localHour)}:${pad(localMinute)}`;
+
+    const card = document.createElement('div');
+    card.className = `slot-card ${colorCls} ${slot.enabled ? 'enabled' : ''}`;
+    card.dataset.slotId = slot.id;
+
+    card.innerHTML = `
+      <div class="slot-top">
+        <span class="slot-name">${slot.label}</span>
+        <label class="toggle">
+          <input type="checkbox" ${slot.enabled ? 'checked' : ''} onchange="onToggle('${slot.id}', this.checked)"/>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="slot-time-row">
+        <input class="slot-time-inp" type="time" value="${localVal}"
+          onchange="onTimeChange('${slot.id}', this.value)"
+          data-slot="${slot.id}"/>
+        <span class="slot-tz-label">${tzShortName()}</span>
+      </div>
+      <div class="slot-utc" id="utclabel_${slot.id}">${fmtUtc(slot.utcHour, slot.utcMinute)}</div>
+    `;
+
+    grid.appendChild(card);
+  });
+
+  renderNextFires(slots);
+}
+
+function tzShortName(){
+  const z = tz();
+  const map = {
+    'Asia/Kolkata':'IST','UTC':'UTC','America/New_York':'EST',
+    'America/Los_Angeles':'PST','Europe/London':'GMT','Europe/Paris':'CET',
+    'Asia/Singapore':'SGT','Asia/Dubai':'GST','Asia/Tokyo':'JST'
+  };
+  return map[z] || z;
+}
+
+function onToggle(slotId, checked){
+  const slot = serverSlots.find(s=>s.id===slotId);
+  if(slot) slot.enabled = checked;
+  // Update card class
+  const card = document.querySelector(`[data-slot-id="${slotId}"]`);
+  if(card) card.classList.toggle('enabled', checked);
+  $('sActive').textContent = serverSlots.filter(s=>s.enabled).length;
+  renderNextFires(serverSlots);
+  setSaveStatus('unsaved','Unsaved changes — click Save to push to server');
+}
+
+function onTimeChange(slotId, localVal){
+  const [lh,lm] = localVal.split(':').map(Number);
+  const { utcHour, utcMinute } = localToUtc(lh, lm, tz());
+  const slot = serverSlots.find(s=>s.id===slotId);
+  if(slot){ slot.utcHour=utcHour; slot.utcMinute=utcMinute; }
+  const lbl = $('utclabel_'+slotId);
+  if(lbl) lbl.textContent = fmtUtc(utcHour, utcMinute);
+  renderNextFires(serverSlots);
+  setSaveStatus('unsaved','Unsaved changes — click Save to push to server');
+}
+
+function onTzChange(){
+  localStorage.setItem('fcm_tz', tz());
+  if(serverSlots) renderSlots(serverSlots);
+}
+
+/* ── Next fire time chips ── */
+function renderNextFires(slots){
+  const container = $('nextFires');
+  const enabled = slots.filter(s=>s.enabled);
+  if(!enabled.length){ container.innerHTML = '<span class="fire-chip">No slots enabled</span>'; return; }
+  container.innerHTML = enabled.map((slot,i)=>{
+    const def = SLOT_DEFS.find(d=>d.id===slot.id) || {};
+    const cls = def.color === 's1' ? '' : def.color;
+    return `<span class="fire-chip on ${cls}">
+      ${slot.label}: ${fmtUtc(slot.utcHour, slot.utcMinute)}
+    </span>`;
+  }).join('');
+}
+
+/* ── Save status helper ── */
+function setSaveStatus(state, text, time=''){
+  const dot = $('saveDot'); const lbl = $('saveLbl');
+  dot.className = 'save-dot' + (state && state!=='unsaved' ? ' '+state : '');
+  lbl.className = 'save-lbl' + (state && state!=='unsaved' ? ' '+state : '');
+  lbl.textContent = text;
+  $('saveTime').textContent = time;
+}
+
+/* ══════════════════════════════════
+   LOAD schedule from server
+══════════════════════════════════ */
+async function loadSchedule(){
+  setSaveStatus('saving','Loading from server…');
+  try{
+    const res  = await fetch(base()+'/api/schedules', { headers: secret() ? {Authorization:'Bearer '+secret()} : {} });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || res.statusText);
+
+    // Merge returned TZ if present
+    if(data.timezone) $('global_tz').value = data.timezone;
+
+    renderSlots(data.slots || defaultSlots());
+    setSaveStatus('saved','Loaded from server', data.updatedAt ? '(saved: '+new Date(data.updatedAt).toLocaleTimeString()+')' : '');
+  } catch(e){
+    setSaveStatus('err','Failed to load: '+e.message);
+  }
+}
+
+/* ══════════════════════════════════
+   SAVE schedule to server
+══════════════════════════════════ */
+async function saveSchedule(){
+  if(!serverSlots){ alert('Load the schedule first'); return; }
+  const btn = $('btnSave');
+  btn.disabled=true; btn.classList.add('loading');
+  setSaveStatus('saving','Saving to Firestore…');
+
+  const t0=Date.now();
+  try{
+    const res  = await fetch(base()+'/api/schedules', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', ...(secret() ? {Authorization:'Bearer '+secret()} : {}) },
+      body: JSON.stringify({ slots: serverSlots, timezone: tz() })
+    });
+    const data = await res.json();
+    const ms   = Date.now()-t0;
+    showRes('cron', res.status, data, ms);  // reuse cron res pane for save response
+
+    if(!res.ok) throw new Error(data.error || res.statusText);
+
+    setSaveStatus('saved','✓ Saved to server — Vercel cron will fire at scheduled times', new Date().toLocaleTimeString());
+    $('sActive').textContent = serverSlots.filter(s=>s.enabled).length;
+  } catch(e){
+    setSaveStatus('err','Save failed: '+e.message);
+  } finally {
+    btn.disabled=false; btn.classList.remove('loading');
+  }
+}
+
+/* ══════════════════════════════════
+   RUN BATCH NOW (bypass schedule)
+══════════════════════════════════ */
+async function runBatchNow(){
+  const btn=$('btnNow');
+  btn.disabled=true; btn.classList.add('loading');
+  const t0=Date.now();
+  try{
+    // Pass ?force=1 so the server can skip the time-window check
+    const res  = await fetch(base()+'/api/cron/push?force=1', {
+      method:'GET',
+      headers: secret() ? {Authorization:'Bearer '+secret()} : {}
+    });
+    const data = await res.json().catch(()=>({}));
+    showRes('cron', res.status, data, Date.now()-t0);
+  } catch(e){
+    showRes('cron', 0, {error:e.message}, Date.now()-t0);
+  } finally {
+    btn.disabled=false; btn.classList.remove('loading');
+  }
+}
+
+/* ══════════════════════════════════
+   INDIVIDUAL SEND
+══════════════════════════════════ */
 async function runSendToUser(){
   const uid = $('uid_input').value.trim();
   if(!uid){ alert('Enter a UID first'); return; }
-  const btn = $('btnStu');
+  const btn=$('btnStu');
   btn.disabled=true; btn.classList.add('loading');
   resetTrace();
-
-  trace(1,'active'); await delay(260);
-  trace(1,'done','reading…'); trace(2,'active'); await delay(260);
-  trace(2,'done','reading…'); trace(3,'active'); await delay(260);
+  trace(1,'active'); await delay(250);
+  trace(1,'done','reading…'); trace(2,'active'); await delay(250);
+  trace(2,'done','reading…'); trace(3,'active'); await delay(250);
   trace(3,'done','reading…'); trace(4,'active');
-
   const t0=Date.now();
   try{
     const res  = await fetch(base()+'/api/send-to-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid})});
@@ -409,104 +664,7 @@ async function runSendToUser(){
     btn.disabled=false; btn.classList.remove('loading');
   }
 }
-
-/* ════════════════════════════════
-   2 — Batch scheduler
-════════════════════════════════ */
-let schedMode='once', schedTimer=null, schedTick=null;
-
-function setMode(m){
-  schedMode=m;
-  $('modeOnce').classList.toggle('on', m==='once');
-  $('modeDaily').classList.toggle('on', m==='daily');
-}
-
-function getMsUntilFire(){
-  const [hh,mm] = $('sched_time').value.split(':').map(Number);
-  const tz = $('sched_tz').value;
-  const now = new Date();
-  const tzNow = new Date(now.toLocaleString('en-US',{timeZone:tz}));
-  const target = new Date(tzNow);
-  target.setHours(hh,mm,0,0);
-  let diff = target - tzNow;
-  if(diff <= 0){
-    if(schedMode==='daily') diff += 86400000;
-    else return null;
-  }
-  return diff;
-}
-
-function fmt(ms){
-  if(ms<=0) return '00:00:00';
-  const s=Math.floor(ms/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
-  return [h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
-}
-
-function setArmUI(state, text, cd=''){
-  $('armDot').className = 'arm-dot'+(state?' '+state:'');
-  $('armLbl').className = 'arm-lbl'+(state?' '+state:'');
-  $('armLbl').textContent = text;
-  $('armCd').textContent  = cd;
-}
-
-function clearTimers(){ clearTimeout(schedTimer); clearInterval(schedTick); schedTimer=schedTick=null; }
-
-function armBatch(){
-  const delayMs = getMsUntilFire();
-  if(delayMs===null){ setArmUI('','⚠ Time already passed — pick a future time or switch to Daily'); return; }
-
-  clearTimers();
-  $('btnArm').disabled=true; $('btnDisarm').disabled=false;
-
-  const fireAt = Date.now()+delayMs;
-  const [hh,mm] = $('sched_time').value.split(':').map(Number);
-  const timeLabel = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} ${$('sched_tz').value}`;
-
-  function tick(){
-    const rem = fireAt-Date.now();
-    if(rem<=0){ clearInterval(schedTick); return; }
-    if(rem<10000) setArmUI('soon',  '🚀 Firing soon…', fmt(rem));
-    else          setArmUI('armed', `Armed · fires at ${timeLabel}`, fmt(rem));
-  }
-  tick();
-  schedTick = setInterval(tick,1000);
-
-  schedTimer = setTimeout(async ()=>{
-    clearInterval(schedTick); schedTick=null;
-    setArmUI('firing','🔥 Firing batch now…','');
-    await executeBatch();
-    if(schedMode==='daily'){
-      armBatch(); // re-arm for tomorrow
-    } else {
-      setArmUI('','✓ One-time fire complete — batch sent to all users');
-      $('btnArm').disabled=false; $('btnDisarm').disabled=true;
-    }
-  }, delayMs);
-}
-
-function disarmBatch(){
-  clearTimers();
-  setArmUI('','Disarmed');
-  $('btnArm').disabled=false; $('btnDisarm').disabled=true;
-}
-
-async function executeBatch(){
-  const btn = $('btnNow');
-  btn.disabled=true; btn.classList.add('loading');
-  const secret = $('cron_secret').value.trim();
-  const t0=Date.now();
-  try{
-    const res  = await fetch(base()+'/api/cron/morning-push',{method:'GET',headers:secret?{Authorization:'Bearer '+secret}:{}});
-    const data = await res.json().catch(()=>({}));
-    showRes('cron', res.status, data, Date.now()-t0);
-  } catch(e){
-    showRes('cron', 0, {error:e.message}, Date.now()-t0);
-  } finally {
-    btn.disabled=false; btn.classList.remove('loading');
-  }
-}
-
-async function runBatchNow(){ await executeBatch(); }
 </script>
 </body>
 </html>
+    
